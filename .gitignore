@@ -20,6 +20,7 @@ build/
 coverage/
 playwright-report/
 test-results/
+.playwright-cli/
 output/
 .pgdata/
 
