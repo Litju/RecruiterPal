@@ -1,7 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, applications, candidates, interviews, jobs } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { applications, candidates, interviews, jobs } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { sql } from "drizzle-orm";
 
@@ -10,9 +11,7 @@ export const metadata = { title: "Interviews" };
 export default async function InterviewsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const rows = await db
+  const rows = await withSessionTenant(session, (tx) => tx
     .select({
       id: interviews.id,
       label: interviews.label,
@@ -32,7 +31,7 @@ export default async function InterviewsPage() {
       ),
     )
     .orderBy(interviews.scheduledStartAt)
-    .limit(200);
+    .limit(200));
 
   return (
     <div className="flex h-full flex-col">

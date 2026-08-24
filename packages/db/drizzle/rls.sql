@@ -41,6 +41,7 @@ DECLARE
 BEGIN
   FOREACH t IN ARRAY tenant_tables LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);
     EXECUTE format('DROP POLICY IF EXISTS tenant_isolation ON %I', t);
     EXECUTE format(
       'CREATE POLICY tenant_isolation ON %I USING (organization_id = NULLIF(current_setting(''rp.organization_id'', true), '''')::uuid) WITH CHECK (organization_id = NULLIF(current_setting(''rp.organization_id'', true), '''')::uuid)',
@@ -50,9 +51,25 @@ BEGIN
 END
 $$;
 
--- sync_cursors inherits tenant scope through its immutable connection_id FK
--- (per data contract: explicit tenant key may be omitted when ownership is
--- inherited through an immutable FK and RLS proof remains clear).
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE organizations FORCE ROW LEVEL SECURITY;
+
+-- Foreign keys do not inherit RLS. sync_cursors is protected through its
+-- immutable integration_connections owner relationship.
+ALTER TABLE sync_cursors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sync_cursors FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS sync_cursor_isolation ON sync_cursors;
+CREATE POLICY sync_cursor_isolation ON sync_cursors
+  USING (EXISTS (
+    SELECT 1 FROM integration_connections c
+    WHERE c.id = sync_cursors.connection_id
+      AND c.organization_id = NULLIF(current_setting('rp.organization_id', true), '')::uuid
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM integration_connections c
+    WHERE c.id = sync_cursors.connection_id
+      AND c.organization_id = NULLIF(current_setting('rp.organization_id', true), '')::uuid
+  ));
 
 --> statement-breakpoint
 
@@ -65,9 +82,18 @@ CREATE POLICY org_self_isolation ON organizations
 --> statement-breakpoint
 
 -- users: an authenticated member may see co-members of their organization only.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS users_same_org ON users;
 CREATE POLICY users_same_org ON users
   USING (
+    EXISTS (
+      SELECT 1 FROM memberships m
+      WHERE m.user_id = users.id
+        AND m.organization_id = NULLIF(current_setting('rp.organization_id', true), '')::uuid
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM memberships m
       WHERE m.user_id = users.id
@@ -87,12 +113,15 @@ BEGIN
   EXECUTE 'CREATE POLICY accounts_owner ON accounts USING (user_id::text = NULLIF(current_setting(''rp.user_id'', true), '''')) WITH CHECK (user_id::text = NULLIF(current_setting(''rp.user_id'', true), ''''))';
 
   EXECUTE 'DROP POLICY IF EXISTS verifications_owner ON verifications';
-  EXECUTE 'CREATE POLICY verifications_owner ON verifications USING (true) WITH CHECK (true)';
+  EXECUTE 'CREATE POLICY verifications_owner ON verifications USING (NULLIF(current_setting(''rp.user_id'', true), '''') IS NOT NULL) WITH CHECK (NULLIF(current_setting(''rp.user_id'', true), '''') IS NOT NULL)';
 END
 $$;
 
 --> statement-breakpoint
 
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions FORCE ROW LEVEL SECURITY;
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accounts FORCE ROW LEVEL SECURITY;
 ALTER TABLE verifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE verifications FORCE ROW LEVEL SECURITY;

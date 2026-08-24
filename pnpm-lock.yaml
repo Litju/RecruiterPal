@@ -66,6 +66,9 @@ importers:
       '@recruiterpal/agent-runtime':
         specifier: workspace:*
         version: link:../../packages/agent-runtime
+      '@recruiterpal/application':
+        specifier: workspace:*
+        version: link:../../packages/application
       '@recruiterpal/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -198,6 +201,43 @@ importers:
       '@recruiterpal/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12)
+
+  packages/application:
+    dependencies:
+      '@recruiterpal/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@recruiterpal/db':
+        specifier: workspace:*
+        version: link:../db
+      '@recruiterpal/domain':
+        specifier: workspace:*
+        version: link:../domain
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0)
+      pg:
+        specifier: ^8.16.3
+        version: 8.23.0
+      zod:
+        specifier: ^4.1.5
+        version: 4.4.3
+    devDependencies:
+      '@recruiterpal/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: ^24.3.1
+        version: 24.13.3
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.23.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3

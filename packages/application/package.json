@@ -1,0 +1,33 @@
+{
+  "name": "@recruiterpal/application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run --passWithNoTests --exclude tests/**/*.db.test.ts",
+    "test:db": "vitest run --config vitest.db.config.ts"
+  },
+  "dependencies": {
+    "@recruiterpal/contracts": "workspace:*",
+    "@recruiterpal/db": "workspace:*",
+    "@recruiterpal/domain": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.16.3",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@recruiterpal/tsconfig": "workspace:*",
+    "@types/pg": "^8.15.5",
+    "@types/node": "^24.3.1",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

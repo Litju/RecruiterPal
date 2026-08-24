@@ -167,6 +167,41 @@ describe("RLS: cross-tenant denial", () => {
   });
 });
 
+describe("RLS: identity and inherited-resource fail-closed proofs", () => {
+  it("does not expose organizations or users without an active tenant", async () => {
+    const noTenantOrganizations = await asTenant(null, async (tx) => tx.select().from(s.organizations));
+    const noTenantUsers = await asTenant(null, async (tx) => tx.select().from(s.users));
+    const ownOrganizations = await asTenant(orgA, async (tx) => tx.select().from(s.organizations));
+    const ownUsers = await asTenant(orgA, async (tx) => tx.select().from(s.users));
+    expect(noTenantOrganizations).toHaveLength(0);
+    expect(noTenantUsers).toHaveLength(0);
+    expect(ownOrganizations).toHaveLength(1);
+    expect(ownUsers.length).toBeGreaterThan(0);
+  });
+
+  it("does not inherit sync-cursor visibility across the foreign key", async () => {
+    const [connection] = await db
+      .insert(s.integrationConnections)
+      .values({ organizationId: orgA, provider: "SYNTHETIC_ATS", mode: "SYNTHETIC", status: "CONNECTED" })
+      .returning({ id: s.integrationConnections.id });
+    await db.insert(s.syncCursors).values({ connectionId: connection!.id, resourceType: "jobs", cursorValue: "cursor-a" });
+    const visibleToA = await asTenant(orgA, async (tx) => tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)));
+    const visibleToB = await asTenant(orgB, async (tx) => tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)));
+    expect(visibleToA).toHaveLength(1);
+    expect(visibleToB).toHaveLength(0);
+  });
+
+  it("does not expose verification tokens without a user context", async () => {
+    await db.insert(s.verifications).values({
+      identifier: "rls-probe",
+      value: "opaque-token",
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+    const visible = await asTenant(orgA, async (tx) => tx.select().from(s.verifications));
+    expect(visible).toHaveLength(0);
+  });
+});
+
 describe("RLS: audit append-only behavior at schema level", () => {
   it("audit records written in one tenant are invisible to another", async () => {
     await db.insert(s.auditRecords).values({

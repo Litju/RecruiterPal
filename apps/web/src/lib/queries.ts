@@ -3,7 +3,7 @@
  * tenant-scoped queries only.
  */
 import { and, count, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
-import { getDb, applications, candidates, exceptions, jobs } from "@recruiterpal/db";
+import { applications, candidates, exceptions, getDb, jobs, withTenant, type TenantContext } from "@recruiterpal/db";
 import type { ExceptionSeverity } from "@recruiterpal/domain";
 
 export interface TodayExceptionRow {
@@ -23,10 +23,9 @@ export interface TodayExceptionRow {
 const OPEN_STATES = ["OPEN", "ACKNOWLEDGED", "AUTO_RESOLVING", "WAITING_EXTERNAL", "WAITING_HUMAN"];
 
 export async function getOpenExceptions(
-  organizationId: string,
+  context: TenantContext,
 ): Promise<TodayExceptionRow[]> {
-  const db = getDb();
-  const rows = await db
+  const rows = await withTenant(getDb(), context, async (tx) => tx
     .select({
       id: exceptions.id,
       type: exceptions.type,
@@ -41,8 +40,8 @@ export async function getOpenExceptions(
       lastRecomputedAt: exceptions.lastRecomputedAt,
     })
     .from(exceptions)
-    .where(and(eq(exceptions.organizationId, organizationId), inArray(exceptions.status, OPEN_STATES)))
-    .orderBy(desc(exceptions.severity), desc(exceptions.deadlineAt));
+    .where(and(eq(exceptions.organizationId, context.organizationId), inArray(exceptions.status, OPEN_STATES)))
+    .orderBy(desc(exceptions.severity), desc(exceptions.deadlineAt)));
   return rows;
 }
 
@@ -74,18 +73,17 @@ export interface PortfolioCounts {
   criticalCount: number;
 }
 
-export async function getPortfolioCounts(organizationId: string): Promise<PortfolioCounts> {
-  const db = getDb();
-  const [openJobs, activeApps] = await Promise.all([
-    db
+export async function getPortfolioCounts(context: TenantContext): Promise<PortfolioCounts> {
+  const [openJobs, activeApps] = await withTenant(getDb(), context, async (tx) => Promise.all([
+    tx
       .select({ n: count() })
       .from(jobs)
-      .where(and(eq(jobs.organizationId, organizationId), eq(jobs.status, "OPEN"))),
-    db
+      .where(and(eq(jobs.organizationId, context.organizationId), eq(jobs.status, "OPEN"))),
+    tx
       .select({ n: count() })
       .from(applications)
-      .where(and(eq(applications.organizationId, organizationId), eq(applications.status, "ACTIVE"))),
-  ]);
+      .where(and(eq(applications.organizationId, context.organizationId), eq(applications.status, "ACTIVE"))),
+  ]));
   return {
     openJobs: openJobs[0]?.n ?? 0,
     activeApplications: activeApps[0]?.n ?? 0,
@@ -94,9 +92,8 @@ export async function getPortfolioCounts(organizationId: string): Promise<Portfo
 }
 
 /** Applications approaching or past their candidate deadline. */
-export async function getDeadlineApplications(organizationId: string) {
-  const db = getDb();
-  return db
+export async function getDeadlineApplications(context: TenantContext) {
+  return withTenant(getDb(), context, (tx) => tx
     .select({
       id: applications.id,
       candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
@@ -110,11 +107,11 @@ export async function getDeadlineApplications(organizationId: string) {
     .innerJoin(jobs, eq(jobs.id, applications.jobId))
     .where(
       and(
-        eq(applications.organizationId, organizationId),
+        eq(applications.organizationId, context.organizationId),
         eq(applications.status, "ACTIVE"),
         sql`${applications.candidateDeadlineAt} IS NOT NULL`,
       ),
     )
     .orderBy(applications.candidateDeadlineAt)
-    .limit(10);
+    .limit(10));
 }

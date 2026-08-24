@@ -1,7 +1,8 @@
 ﻿import { eq } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, integrationConnections } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { integrationConnections } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Settings" };
@@ -9,9 +10,7 @@ export const metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const connections = await db
+  const connections = await withSessionTenant(session, (tx) => tx
     .select({
       provider: integrationConnections.provider,
       mode: integrationConnections.mode,
@@ -19,7 +18,7 @@ export default async function SettingsPage() {
       lastSyncedAt: integrationConnections.lastSyncedAt,
     })
     .from(integrationConnections)
-    .where(eq(integrationConnections.organizationId, session.organizationId));
+    .where(eq(integrationConnections.organizationId, session.organizationId)));
 
   return (
     <div className="flex h-full flex-col">

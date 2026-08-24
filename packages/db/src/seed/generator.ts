@@ -309,7 +309,10 @@ export async function seedDemoWorld(
           organizationId: orgId,
           protocolVersionId: activeVersionId,
           competencyId: compIds[name]!,
-          requiredLevel: pickInt(rng, 3, 4),
+          requiredLevel:
+            spec.title === "Senior ML Engineer" && name === "Technical Leadership"
+              ? 4
+              : pickInt(rng, 3, 4),
           evidenceSource: "INTERVIEW_SCORECARD",
           isRequired: true,
         });
@@ -495,7 +498,7 @@ export async function seedDemoWorld(
                   for (const cname of requiredComps) {
                     let rating = pickInt(rng, 2, 5);
                     if (isSofiaFirst && cname === "Technical Leadership") {
-                      rating = pi === 0 ? 5 : 3; // crosses the level-3 advancement threshold
+                      rating = pi === 0 ? 5 : 3; // crosses the level-4 advancement threshold
                     }
                     await tx
                       .insert(s.scorecardRatings)

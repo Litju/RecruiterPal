@@ -1,7 +1,8 @@
 import { and, eq, count } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, jobs, applications, users } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { jobs, applications, users } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Jobs" };
@@ -9,9 +10,7 @@ export const metadata = { title: "Jobs" };
 export default async function JobsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const rows = await db
+  const rows = await withSessionTenant(session, (tx) => tx
     .select({
       id: jobs.id,
       title: jobs.title,
@@ -30,7 +29,7 @@ export default async function JobsPage() {
     )
     .where(eq(jobs.organizationId, session.organizationId))
     .groupBy(jobs.id, users.name)
-    .orderBy(jobs.createdAt);
+    .orderBy(jobs.createdAt));
 
   return (
     <div className="flex h-full flex-col">

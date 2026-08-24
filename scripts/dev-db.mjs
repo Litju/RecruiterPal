@@ -3,7 +3,7 @@
  * Dev/test database lifecycle helper (Docker).
  * Usage: node scripts/dev-db.mjs start|stop|reset
  */
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 
 const CONTAINER = "recruiterpal-dev-pg";
 const PORT = process.env.RP_PG_PORT ?? "5499";
@@ -43,15 +43,19 @@ if (action === "start") {
       if (ready) break;
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
     }
+    run(
+      `docker exec ${CONTAINER} psql -U postgres -d ${DB} -v ON_ERROR_STOP=1 -c "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'rp_app') THEN CREATE ROLE rp_app LOGIN PASSWORD '${PASSWORD}'; ELSE ALTER ROLE rp_app LOGIN PASSWORD '${PASSWORD}'; END IF; END $$;"`,
+    );
     console.log(`${CONTAINER} started on :${PORT}`);
   }
   console.log(`DATABASE_URL=postgresql://postgres:${PASSWORD}@localhost:${PORT}/${DB}`);
+  console.log(`RP_APP_DATABASE_URL=postgresql://rp_app:${PASSWORD}@localhost:${PORT}/${DB}`);
 } else if (action === "stop") {
   run(`docker rm -f ${CONTAINER}`);
   console.log("stopped");
 } else if (action === "reset") {
   run(`docker rm -f ${CONTAINER}`);
-  execSync(process.argv[0] + " " + process.argv[1] + " start", { stdio: "inherit" });
+  execFileSync(process.execPath, [process.argv[1], "start"], { stdio: "inherit" });
 } else {
   console.error("Unknown action:", action);
   process.exit(1);

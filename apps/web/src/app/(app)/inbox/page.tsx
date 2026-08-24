@@ -1,7 +1,8 @@
 ﻿import { and, desc, eq } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, communicationThreads, messages, extractedFacts } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { communicationThreads, extractedFacts } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Inbox" };
@@ -9,21 +10,20 @@ export const metadata = { title: "Inbox" };
 export default async function InboxPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const threads = await db
-    .select()
-    .from(communicationThreads)
-    .where(eq(communicationThreads.organizationId, session.organizationId))
-    .orderBy(desc(communicationThreads.lastMessageAt))
-    .limit(50);
-
-  const facts = await db
-    .select()
-    .from(extractedFacts)
-    .where(and(eq(extractedFacts.organizationId, session.organizationId), eq(extractedFacts.reviewState, "UNREVIEWED")))
-    .orderBy(desc(extractedFacts.createdAt))
-    .limit(20);
+  const { threads, facts } = await withSessionTenant(session, async (tx) => ({
+    threads: await tx
+      .select()
+      .from(communicationThreads)
+      .where(eq(communicationThreads.organizationId, session.organizationId))
+      .orderBy(desc(communicationThreads.lastMessageAt))
+      .limit(50),
+    facts: await tx
+      .select()
+      .from(extractedFacts)
+      .where(and(eq(extractedFacts.organizationId, session.organizationId), eq(extractedFacts.reviewState, "UNREVIEWED")))
+      .orderBy(desc(extractedFacts.createdAt))
+      .limit(20),
+  }));
 
   return (
     <div className="flex h-full flex-col">

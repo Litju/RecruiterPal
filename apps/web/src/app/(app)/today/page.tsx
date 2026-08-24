@@ -8,6 +8,7 @@ import {
   groupExceptionsByPriority,
   getDeadlineApplications,
 } from "@/lib/queries";
+import { tenantContext } from "@/lib/tenant-db";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -15,11 +16,12 @@ export default async function TodayPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
   const orgId = session.organizationId;
+  const context = tenantContext(session);
 
   const [exceptions, counts, deadlines] = await Promise.all([
-    getOpenExceptions(orgId),
-    getPortfolioCounts(orgId),
-    getDeadlineApplications(orgId),
+    getOpenExceptions(context),
+    getPortfolioCounts(context),
+    getDeadlineApplications(context),
   ]);
   const { critical, blocked, signals } = groupExceptionsByPriority(exceptions);
 

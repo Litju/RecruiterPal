@@ -38,7 +38,8 @@ export async function getSession(auth: Auth): Promise<PalSession | null> {
     if (memberships.length !== 1 || !memberships[0]?.organizationId) return null;
     activeOrganizationId = memberships[0].organizationId;
   }
-  const role = (memberships[0]?.role ?? "recruiter").toLowerCase();
+  if (!memberships[0]?.organizationId || !memberships[0]?.role) return null;
+  const role = memberships[0].role.toLowerCase();
 
   const actor: ActorContext = {
     userId: result.user.id,

@@ -1,7 +1,8 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, applications, candidates, jobs } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { candidates } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Candidates" };
@@ -9,9 +10,7 @@ export const metadata = { title: "Candidates" };
 export default async function CandidatesPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const rows = await db
+  const rows = await withSessionTenant(session, (tx) => tx
     .select({
       id: candidates.id,
       name: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
@@ -22,7 +21,7 @@ export default async function CandidatesPage() {
     .from(candidates)
     .where(eq(candidates.organizationId, session.organizationId))
     .orderBy(desc(candidates.createdAt))
-    .limit(200);
+    .limit(200));
 
   return (
     <div className="flex h-full flex-col">

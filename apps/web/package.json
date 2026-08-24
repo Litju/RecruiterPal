@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.46",
+    "@recruiterpal/application": "workspace:*",
     "@recruiterpal/agent-runtime": "workspace:*",
     "@recruiterpal/auth": "workspace:*",
     "@recruiterpal/contracts": "workspace:*",

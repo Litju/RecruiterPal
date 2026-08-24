@@ -1,16 +1,13 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { getDb } from "../client";
+import { createDb } from "../client";
 import { seedDemoWorld } from "../seed/generator";
 import { requireEnv } from "./env";
 
 const connectionString = requireEnv("DATABASE_URL");
 
-const pool = new Pool({ connectionString, max: 4 });
-const db = drizzle(pool);
+const { db, pool } = createDb({ connectionString, max: 4 });
 
 try {
-  const world = await seedDemoWorld(getDb(), { seed: 1337 });
+  const world = await seedDemoWorld(db, { seed: 1337 });
   console.log("Seeded Northstar Labs demo world.");
   console.log(`  organization: ${world.organizationId}`);
   console.log(`  security tenant: ${world.securityOrgId}`);

@@ -34,10 +34,10 @@ export function createDb(config: DbConfig) {
  * instances instead.
  */
 export function getDb(): ReturnType<typeof createDb>["db"] {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.RP_APP_DATABASE_URL;
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is required. Copy .env.example to .env.local and configure a database.",
+      "RP_APP_DATABASE_URL is required in production; configure the restricted tenant-scoped application role.",
     );
   }
   if (!cachedPool) {

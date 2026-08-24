@@ -1,7 +1,8 @@
 ﻿import { and, desc, eq } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, auditRecords } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { auditRecords } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Activity" };
@@ -16,14 +17,12 @@ const ACTOR_STYLE: Record<string, string> = {
 export default async function ActivityPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
-  const records = await db
+  const records = await withSessionTenant(session, (tx) => tx
     .select()
     .from(auditRecords)
     .where(eq(auditRecords.organizationId, session.organizationId))
     .orderBy(desc(auditRecords.occurredAt))
-    .limit(200);
+    .limit(200));
 
   return (
     <div className="flex h-full flex-col">

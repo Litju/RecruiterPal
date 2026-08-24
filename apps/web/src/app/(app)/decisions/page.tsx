@@ -1,7 +1,8 @@
 ﻿import { and, desc, eq, sql } from "drizzle-orm";
 import { getAuth } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { getDb, applications, candidates, decisionReadinessSnapshots, jobs } from "@recruiterpal/db";
+import { withSessionTenant } from "@/lib/tenant-db";
+import { applications, candidates, decisionReadinessSnapshots, jobs } from "@recruiterpal/db";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 
 export const metadata = { title: "Decisions" };
@@ -9,10 +10,8 @@ export const metadata = { title: "Decisions" };
 export default async function DecisionsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const db = getDb();
-
   // Latest readiness snapshot per active application (deterministic states).
-  const rows = await db
+  const rows = await withSessionTenant(session, (tx) => tx
     .select({
       applicationId: applications.id,
       candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
@@ -30,14 +29,14 @@ export default async function DecisionsPage() {
       ),
     )
     .orderBy(desc(applications.lastActivityAt))
-    .limit(100);
+    .limit(100));
 
-  const snapshots = await db
+  const snapshots = await withSessionTenant(session, (tx) => tx
     .select()
     .from(decisionReadinessSnapshots)
     .where(eq(decisionReadinessSnapshots.organizationId, session.organizationId))
     .orderBy(desc(decisionReadinessSnapshots.computedAt))
-    .limit(300);
+    .limit(300));
   const latestByApp = new Map<string, typeof snapshots[number]>();
   for (const s of snapshots) {
     if (!latestByApp.has(s.applicationId)) latestByApp.set(s.applicationId, s);

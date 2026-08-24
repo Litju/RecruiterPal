@@ -8,12 +8,18 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { fileURLToPath } from "node:url";
 
-const DATABASE_URL =
-  process.env.RP_TEST_DATABASE_URL ??
-  process.env.DATABASE_URL ??
-  "postgresql://postgres:recruiterpal@localhost:5499/recruiterpal";
+const DATABASE_URL = process.env.RP_TEST_DATABASE_URL ?? process.env.DATABASE_URL ?? "postgresql://postgres:recruiterpal@localhost:5499/recruiterpal";
+
+function assertDisposableDatabase(url: string): void {
+  if (process.env.RP_TEST_DATABASE_URL) return;
+  const parsed = new URL(url);
+  if (!(parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") || (parsed.port && parsed.port !== "5499")) {
+    throw new Error("Refusing destructive DB qualification without RP_TEST_DATABASE_URL pointing at a disposable local database.");
+  }
+}
 
 export async function setup() {
+  assertDisposableDatabase(DATABASE_URL);
   const pool = new Pool({ connectionString: DATABASE_URL, max: 4 });
   const db = drizzle(pool);
   await db.execute(

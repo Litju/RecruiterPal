@@ -1,0 +1,4 @@
+{
+  "extends": "@recruiterpal/tsconfig/react-library",
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
