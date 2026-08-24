@@ -1,0 +1,2 @@
+DROP INDEX "workflow_instances_org_type_obj_idx";--> statement-breakpoint
+CREATE UNIQUE INDEX "workflow_instances_org_type_obj_idx" ON "workflow_instances" USING btree ("organization_id","workflow_type","business_object_id");

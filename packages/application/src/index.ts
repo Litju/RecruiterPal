@@ -371,6 +371,68 @@ async function completeAction(
     .where(eq(s.actions.id, actionId));
 }
 
+export interface WorkflowActionInput {
+  actionType: "send_scorecard_reminder" | "send_candidate_follow_up" | "send_status_update";
+  targetRefs: string[];
+  parameters: Record<string, unknown>;
+  rationale: string;
+  idempotencyKey: string;
+  outcome?: Record<string, unknown>;
+}
+
+/** Record an idempotent administrative workflow side effect at the application boundary. */
+export async function recordWorkflowAction(
+  db: RecruiterPalDb,
+  ctx: ApplicationContext,
+  input: WorkflowActionInput,
+): Promise<MutationResult<ActionRow>> {
+  assertContext(ctx);
+  if (ctx.actor.origin !== "workflow") {
+    throw new ApplicationInvariantError("FORBIDDEN", "Only workflow actors may record workflow side effects.");
+  }
+  assertPermission(ctx.actor, PERMISSIONS.COMMUNICATION_SEND_AUTOMATED);
+  return withTenant(db, ctx.tenant, async (tx) => {
+    const started = await startAction(tx, ctx, {
+      actionType: input.actionType,
+      targetRefs: input.targetRefs,
+      parameters: input.parameters,
+      rationale: input.rationale,
+      idempotencyKey: input.idempotencyKey,
+      status: "EXECUTING",
+    });
+    if (started.replayed && started.action.status === "SUCCEEDED") {
+      return { value: started.action, actionId: started.action.id, replayed: true };
+    }
+    const outcome = input.outcome ?? { recorded: true };
+    await completeAction(tx, started.action.id, outcome);
+    const [completed] = await tx.select().from(s.actions).where(eq(s.actions.id, started.action.id)).limit(1);
+    if (!completed) throw new ApplicationInvariantError("STALE_STATE", "Workflow action disappeared before completion.");
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "workflow.action.executed",
+      aggregateType: "action",
+      aggregateId: started.action.id,
+      payload: { actionType: input.actionType, targetRefs: input.targetRefs, idempotencyKey: started.action.idempotencyKey },
+      actorType: "WORKFLOW",
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: "WORKFLOW",
+      actorId: ctx.actor.userId,
+      actionType: input.actionType,
+      targetType: "workflow_action",
+      targetId: started.action.id,
+      authorityClass: "A1",
+      policyVersion: POLICY_VERSION,
+      beforeState: { status: started.action.status },
+      afterState: { status: "SUCCEEDED" },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
+    return { value: completed, actionId: completed.id, replayed: false };
+  });
+}
+
 async function approvedAction(
   tx: TenantTx,
   ctx: ApplicationContext,

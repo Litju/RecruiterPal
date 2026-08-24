@@ -785,7 +785,7 @@ export const workflowInstances = pgTable(
     lastError: text("last_error"),
   },
   (t) => [
-    index("workflow_instances_org_type_obj_idx").on(t.organizationId, t.workflowType, t.businessObjectId),
+    uniqueIndex("workflow_instances_org_type_obj_idx").on(t.organizationId, t.workflowType, t.businessObjectId),
   ],
 );
 
