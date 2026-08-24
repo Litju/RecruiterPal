@@ -90,6 +90,9 @@ importers:
       '@recruiterpal/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@recruiterpal/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@recruiterpal/observability':
         specifier: workspace:*
         version: link:../../packages/observability

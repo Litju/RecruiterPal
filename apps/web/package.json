@@ -17,6 +17,7 @@
     "@recruiterpal/contracts": "workspace:*",
     "@recruiterpal/db": "workspace:*",
     "@recruiterpal/domain": "workspace:*",
+    "@recruiterpal/integrations": "workspace:*",
     "@recruiterpal/observability": "workspace:*",
     "@recruiterpal/ui": "workspace:*",
     "@recruiterpal/workflows": "workspace:*",
