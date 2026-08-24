@@ -1,7 +1,7 @@
 /**
  * SLA arithmetic is deterministic domain code, never model reasoning.
  */
-import type { ScorecardSlaState } from "./state-machines.js";
+import type { ScorecardSlaState } from "./state-machines";
 
 export interface SlaThresholds {
   /** Minutes after creation before the item is DUE_SOON. */

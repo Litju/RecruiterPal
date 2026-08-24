@@ -15,7 +15,7 @@ import {
   permissionsForRoles,
   UnauthorizedError,
   buildExceptionKey,
-} from "./index.js";
+} from "./index";
 
 const HOUR = 3_600_000;
 

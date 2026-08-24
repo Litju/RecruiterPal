@@ -4,7 +4,7 @@
  * mutate stage state directly; every consequential terminal transition
  * requires an authorized human action record.
  */
-import { IllegalTransitionError } from "./state-machines.js";
+import { IllegalTransitionError } from "./state-machines";
 
 export const CANONICAL_STAGE_ORDER = [
   "APPLIED",

@@ -4,7 +4,7 @@
  * application code has a bug. Fail closed: unset setting => no rows.
  */
 import { sql } from "drizzle-orm";
-import type { RecruiterPalDb } from "./client.js";
+import type { RecruiterPalDb } from "./client";
 
 export const TENANT_SETTING = "rp.organization_id";
 

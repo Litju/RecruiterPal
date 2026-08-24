@@ -11,8 +11,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, sql } from "drizzle-orm";
 import { Pool } from "pg";
-import * as s from "../src/schema.js";
-import { seedDemoWorld } from "../src/seed/generator.js";
+import * as s from "../src/schema";
+import { seedDemoWorld } from "../src/seed/generator";
 
 let pool: Pool;
 let db: ReturnType<typeof drizzle>;

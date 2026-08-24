@@ -3,8 +3,8 @@
  * call these; tests assert their presence.
  */
 import { auditRecordSchema, type AuditRecord } from "@recruiterpal/contracts";
-import * as s from "./schema.js";
-import type { TenantContext, TenantTx } from "./tenant.js";
+import * as s from "./schema";
+import type { TenantContext, TenantTx } from "./tenant";
 
 export interface AuditInput {
   actorType: "HUMAN" | "AGENT" | "WORKFLOW" | "INTEGRATION";

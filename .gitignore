@@ -38,3 +38,4 @@ Thumbs.db
 # local runtime state
 *.log
 .eve/
+.codebase-memory/

@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { getDb } from "../client.js";
-import { seedDemoWorld } from "../seed/generator.js";
-import { requireEnv } from "./env.js";
+import { getDb } from "../client";
+import { seedDemoWorld } from "../seed/generator";
+import { requireEnv } from "./env";
 
 const connectionString = requireEnv("DATABASE_URL");
 

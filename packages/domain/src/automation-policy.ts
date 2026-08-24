@@ -3,7 +3,7 @@
  * automatically (A1), which require approval (A2), and which are human-only
  * (A3). Domain code derives final authority; the model can never self-authorize.
  */
-import type { AuthorityClass } from "./authority.js";
+import type { AuthorityClass } from "./authority";
 
 export const AUTOMATION_POLICY_VERSION = "ap-1.0.0";
 

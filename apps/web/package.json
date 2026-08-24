@@ -16,7 +16,6 @@
     "@recruiterpal/contracts": "workspace:*",
     "@recruiterpal/db": "workspace:*",
     "@recruiterpal/domain": "workspace:*",
-    "@recruiterpal/integrations": "workspace:*",
     "@recruiterpal/observability": "workspace:*",
     "@recruiterpal/ui": "workspace:*",
     "@recruiterpal/workflows": "workspace:*",
@@ -26,16 +25,21 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "workflow": "^4.8.4",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.16.3",
+    "lucide-react": "^0.545.0",
+    "better-auth": "^1.7.1"
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",
     "@types/node": "^24.3.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "eslint-config-next": "16.3.2",
+    "@types/pg": "^8.15.5",
+    "@tailwindcss/postcss": "^4.3.3"
   }
 }

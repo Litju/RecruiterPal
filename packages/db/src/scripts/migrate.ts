@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
-import { requireEnv } from "./env.js";
+import { requireEnv } from "./env";
 
 const connectionString = requireEnv("DATABASE_URL");
 

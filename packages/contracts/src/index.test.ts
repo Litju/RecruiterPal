@@ -6,7 +6,7 @@ import {
   palResponseSchema,
   ToolError,
   uiIntentSchema,
-} from "./index.js";
+} from "./index";
 
 const uuid = () => "11111111-1111-4111-8111-111111111111";
 

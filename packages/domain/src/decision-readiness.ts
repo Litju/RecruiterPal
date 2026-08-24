@@ -3,7 +3,7 @@
  * required evidence and approvals for a human to decide. It is deterministic,
  * never a candidate quality score, and never emits "fit" percentages.
  */
-import type { DecisionReadinessStatus } from "./state-machines.js";
+import type { DecisionReadinessStatus } from "./state-machines";
 
 export interface ReadinessCheck {
   readonly check: string;

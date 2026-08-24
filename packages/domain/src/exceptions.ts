@@ -3,7 +3,7 @@
  * deduplication keys so re-scans update the same logical exception instead of
  * spamming duplicates.
  */
-import type { ExceptionType } from "./state-machines.js";
+import type { ExceptionType } from "./state-machines";
 
 export const EXCEPTION_SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 export type ExceptionSeverity = (typeof EXCEPTION_SEVERITIES)[number];

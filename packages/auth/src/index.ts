@@ -1,2 +1,2 @@
-/** RecruiterPal Better Auth configuration lives here. */
-export const AUTH_PACKAGE_VERSION = "0.1.0";
+export { createRecruiterPalAuth, type RecruiterPalAuth } from "./server";
+export { AUTH_PACKAGE_VERSION } from "./version";

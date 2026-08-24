@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/*
+ * RecruiterPal design tokens — premium, dense, quiet.
+ * Violet is reserved for Pal intelligence/agent-originated actions.
+ * Color never carries meaning alone: every state pairs color + icon/text.
+ */
+@theme {
+  --font-sans:
+    var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Light theme (default) */
+  --color-canvas: #faf9f7;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f4f3f0;
+  --color-surface-3: #ebe9e4;
+  --color-text-primary: #1d1c1a;
+  --color-text-secondary: #6b6862;
+  --color-text-tertiary: #98948c;
+  --color-border-subtle: #e7e5e0;
+  --color-border-strong: #d4d1ca;
+
+  --color-pal: #7c5cff;
+  --color-pal-strong: #6544f4;
+  --color-pal-subtle: #efeaff;
+  --color-pal-text: #5b3fe0;
+
+  --color-info: #2f6fd8;
+  --color-info-subtle: #e8effc;
+  --color-warning: #b97d10;
+  --color-warning-subtle: #fdf3df;
+  --color-danger: #c93a2e;
+  --color-danger-subtle: #fcebe9;
+  --color-success: #23794a;
+  --color-success-subtle: #e5f4eb;
+
+  --radius-control: 7px;
+  --radius-card: 11px;
+  --radius-overlay: 15px;
+
+  --shadow-drawer: 0 12px 40px rgb(24 22 20 / 0.14);
+  --shadow-popover: 0 8px 30px rgb(24 22 20 / 0.16);
+}
+
+/* Dark theme overrides */
+.dark {
+  --color-canvas: #17161a;
+  --color-surface-1: #201f24;
+  --color-surface-2: #28272d;
+  --color-surface-3: #313037;
+  --color-text-primary: #eceae6;
+  --color-text-secondary: #a29f98;
+  --color-text-tertiary: #77746d;
+  --color-border-subtle: #34333a;
+  --color-border-strong: #45444d;
+
+  --color-pal-subtle: #2a2444;
+  --color-pal-text: #b3a1ff;
+
+  --color-info: #6ea3ee;
+  --color-info-subtle: #1d2739;
+  --color-warning: #d9a144;
+  --color-warning-subtle: #33290f;
+  --color-danger: #e5695e;
+  --color-danger-subtle: #381d1a;
+  --color-success: #55ab77;
+  --color-success-subtle: #16281e;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1, "cv03" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-pal-subtle);
+}
+
+/* Visible focus everywhere — WCAG 2.2 AA release criterion. */
+*:focus-visible {
+  outline: 2px solid var(--color-pal);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Restrained motion; everything respects prefers-reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

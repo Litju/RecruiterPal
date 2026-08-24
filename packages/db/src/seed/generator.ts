@@ -5,8 +5,12 @@
  * The same seed input reproduces identical fixtures in any environment.
  */
 import { computeSlaState } from "@recruiterpal/domain";
-import type { RecruiterPalDb } from "../client.js";
-import * as s from "../schema.js";
+import { hashPassword } from "better-auth/crypto";
+import type { RecruiterPalDb } from "../client";
+import * as s from "../schema";
+
+/** Shared demo password for seeded synthetic users only. Never use in prod. */
+export const DEMO_PASSWORD = "northstar-demo-2026";
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32) — deterministic across platforms/runs.
@@ -157,6 +161,18 @@ export async function seedDemoWorld(
 
     // Security-test tenant: one isolated user, no shared rows.
     await insertUser("Alex Meridian", "alex.meridian@meridian-compliance.example", "owner", secOrgId);
+
+    // Credential accounts so demo users can actually sign in (synthetic only).
+    const demoPasswordHash = await hashPassword(DEMO_PASSWORD);
+    for (const u of [lead, ...recruiters, ...interviewers]) {
+      await tx.insert(s.accounts).values({
+        userId: u.id,
+        issuer: "local:credential",
+        providerId: "credential",
+        accountId: u.id,
+        password: demoPasswordHash,
+      });
+    }
 
     const allPanelists = [...interviewers.filter((i) => i.role === "interviewer")];
 
