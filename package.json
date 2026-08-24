@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
-    "test:db": "pnpm --filter @recruiterpal/db test:db && pnpm --filter @recruiterpal/application test:db && pnpm --filter @recruiterpal/workflows test:db",
+    "test:db": "pnpm --filter @recruiterpal/db test:db && pnpm --filter @recruiterpal/application test:db && pnpm --filter @recruiterpal/workflows test:db && pnpm --filter @recruiterpal/agent-runtime test:db",
     "test:e2e": "turbo run test:e2e",
     "test:workflows": "turbo run test:workflows",
     "evals": "turbo run evals",
@@ -28,8 +28,10 @@
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",
+    "eslint": "9.39.5",
     "lefthook": "^1.13.6",
     "prettier": "^3.6.2",
+    "typescript-eslint": "8.67.0",
     "turbo": "^2.5.8",
     "typescript": "5.9.3"
   },

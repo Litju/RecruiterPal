@@ -11,6 +11,9 @@ importers:
       '@recruiterpal/tsconfig':
         specifier: workspace:*
         version: link:packages/tsconfig
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5(jiti@2.7.0)
       lefthook:
         specifier: ^1.13.6
         version: 1.13.6
@@ -23,6 +26,9 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      typescript-eslint:
+        specifier: 8.67.0
+        version: 8.67.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
 
   agent:
     dependencies:
@@ -41,6 +47,9 @@ importers:
       '@recruiterpal/domain':
         specifier: workspace:*
         version: link:../packages/domain
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0)
       eve:
         specifier: 0.44.3
         version: 0.44.3(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(@vercel/queue@0.3.1)(ai@7.0.77(zod@4.4.3))(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0))(giget@3.3.1)(jiti@2.7.0)(rollup@4.62.5)(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
@@ -163,6 +172,9 @@ importers:
       '@recruiterpal/contracts':
         specifier: workspace:*
         version: link:../packages/contracts
+      eve:
+        specifier: 0.44.3
+        version: 0.44.3(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(@vercel/queue@0.3.1)(ai@7.0.77(zod@4.4.3))(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0))(giget@3.3.1)(jiti@2.7.0)(rollup@4.62.5)(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
     devDependencies:
       '@recruiterpal/tsconfig':
         specifier: workspace:*
@@ -182,6 +194,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^4.0.46
         version: 4.0.46(zod@4.4.3)
+      '@recruiterpal/application':
+        specifier: workspace:*
+        version: link:../application
       '@recruiterpal/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -191,6 +206,9 @@ importers:
       '@recruiterpal/domain':
         specifier: workspace:*
         version: link:../domain
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0)
       eve:
         specifier: 0.44.3
         version: 0.44.3(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(@vercel/queue@0.3.1)(ai@7.0.77(zod@4.4.3))(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0))(giget@3.3.1)(jiti@2.7.0)(rollup@4.62.5)(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
@@ -201,6 +219,12 @@ importers:
       '@recruiterpal/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.23.1
+      pg:
+        specifier: ^8.16.3
+        version: 8.23.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -9507,7 +9531,7 @@ snapshots:
       rolldown: 1.2.5
       srvx: 0.11.22
       unenv: 2.0.0-rc.24
-      unstorage: 2.0.0-alpha.7(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(chokidar@5.0.0)(db0@0.3.4(drizzle-orm@0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0)))(ofetch@2.0.0-alpha.3)
+      unstorage: 2.0.0-alpha.7(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(chokidar@5.0.0)(db0@0.3.4)(ofetch@2.0.0-alpha.3)
     optionalDependencies:
       '@vercel/queue': 0.3.1
       dotenv: 17.4.2
@@ -10575,7 +10599,7 @@ snapshots:
       '@unrs/resolver-binding-win32-ia32-msvc': 1.12.2
       '@unrs/resolver-binding-win32-x64-msvc': 1.12.2
 
-  unstorage@2.0.0-alpha.7(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(chokidar@5.0.0)(db0@0.3.4(drizzle-orm@0.45.2(@types/pg@8.23.1)(kysely@0.29.5)(pg@8.23.0)))(ofetch@2.0.0-alpha.3):
+  unstorage@2.0.0-alpha.7(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49))(chokidar@5.0.0)(db0@0.3.4)(ofetch@2.0.0-alpha.3):
     optionalDependencies:
       '@vercel/functions': 3.9.5(@aws-sdk/credential-provider-web-identity@3.972.49)
       chokidar: 5.0.0

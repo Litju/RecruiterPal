@@ -6,13 +6,14 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "node ../scripts/lint-package.mjs",
     "evals": "tsx run-evals.ts"
   },
   "dependencies": {
     "@recruiterpal/agent": "workspace:*",
     "@recruiterpal/agent-runtime": "workspace:*",
-    "@recruiterpal/contracts": "workspace:*"
+    "@recruiterpal/contracts": "workspace:*",
+    "eve": "0.44.3"
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",

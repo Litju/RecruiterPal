@@ -2,9 +2,8 @@
  * Server-side portfolio queries — read canonical PostgreSQL state through
  * tenant-scoped queries only.
  */
-import { and, count, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { applications, candidates, exceptions, getDb, jobs, withTenant, type TenantContext } from "@recruiterpal/db";
-import type { ExceptionSeverity } from "@recruiterpal/domain";
 
 export interface TodayExceptionRow {
   id: string;
@@ -93,7 +92,7 @@ export async function getPortfolioCounts(context: TenantContext): Promise<Portfo
 
 /** Applications approaching or past their candidate deadline. */
 export async function getDeadlineApplications(context: TenantContext) {
-  return withTenant(getDb(), context, (tx) => tx
+  const rows = await withTenant(getDb(), context, (tx) => tx
     .select({
       id: applications.id,
       candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
@@ -114,4 +113,8 @@ export async function getDeadlineApplications(context: TenantContext) {
     )
     .orderBy(applications.candidateDeadlineAt)
     .limit(10));
+  return rows.map((row) => ({
+    ...row,
+    deadlineUrgent: row.deadlineAt !== null && row.deadlineAt.getTime() - Date.now() < 36 * 3600_000,
+  }));
 }

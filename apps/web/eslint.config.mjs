@@ -3,7 +3,7 @@ import nextVitals from "eslint-config-next";
 import tseslint from "typescript-eslint";
 
 const eslintConfig = defineConfig([
-  ...nextVitals.coreWebVitals,
+  ...nextVitals,
   ...tseslint.configs.recommended,
   {
     rules: {

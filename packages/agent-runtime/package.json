@@ -11,19 +11,24 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "test:unit": "vitest run --passWithNoTests"
+    "lint": "node ../../scripts/lint-package.mjs",
+    "test:unit": "vitest run --passWithNoTests --exclude tests/**/*.db.test.ts",
+    "test:db": "vitest run --config vitest.db.config.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.46",
+    "@recruiterpal/application": "workspace:*",
     "@recruiterpal/contracts": "workspace:*",
     "@recruiterpal/db": "workspace:*",
     "@recruiterpal/domain": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "eve": "0.44.3",
     "zod": "^4.1.5"
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",
+    "@types/pg": "^8.15.5",
+    "pg": "^8.16.3",
     "typescript": "5.9.3",
     "vitest": "^3.2.4"
   }

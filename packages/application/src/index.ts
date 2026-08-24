@@ -7,7 +7,7 @@
  * domain-event pair. Agents and workflows call this boundary; they never
  * receive a database client.
  */
-import { and, eq, inArray, isNull, ne } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import {
   ACTION_TYPES,
@@ -24,7 +24,6 @@ import {
   detectMaterialConflicts,
   type ActionType,
   type ActorContext,
-  type AuthorityClass,
   type DecisionReadinessResult,
   type ExceptionSeverity,
 } from "@recruiterpal/domain";

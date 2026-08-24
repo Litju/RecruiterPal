@@ -1,11 +1,9 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { createDb, schema, seedDemoWorld, withTenant, type DemoWorldIds } from "@recruiterpal/db";
 import { permissionsForRoles, type ActorContext } from "@recruiterpal/domain";
 import {
-  ApplicationInvariantError,
   decideApproval,
-  openScorecard,
   proposeAction,
   recomputeDecisionReadiness,
   requestApproval,

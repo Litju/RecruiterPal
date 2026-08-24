@@ -15,7 +15,6 @@ export const metadata: Metadata = { title: "Today" };
 export default async function TodayPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const orgId = session.organizationId;
   const context = tenantContext(session);
 
   const [exceptions, counts, deadlines] = await Promise.all([
@@ -97,7 +96,7 @@ export default async function TodayPage() {
                   </div>
                   <span
                     className={`shrink-0 text-[12px] tabular ${
-                      d.deadlineAt && d.deadlineAt.getTime() - Date.now() < 36 * 3600_000
+                      d.deadlineUrgent
                         ? "font-semibold text-danger"
                         : "text-text-secondary"
                     }`}

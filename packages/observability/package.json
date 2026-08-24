@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "node ../../scripts/lint-package.mjs"
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",

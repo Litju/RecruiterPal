@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "node ../../scripts/lint-package.mjs",
     "test:workflows": "vitest run --exclude tests/**/*.db.test.ts",
     "test:db": "vitest run --config vitest.db.config.ts"
   },
