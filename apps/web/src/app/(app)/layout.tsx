@@ -7,27 +7,38 @@ import { exceptions, approvals, organizations } from "@recruiterpal/db";
 import { PrimaryNav } from "@/components/PrimaryNav";
 import { CommandPalette } from "@/components/CommandPalette";
 
-export default async function AppLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default async function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const auth = getAuth();
   const session = await getSession(auth);
   if (!session) redirect("/login");
 
   const orgId = session.organizationId;
 
-  const { criticalRows, approvalRows, organizationRows } = await withSessionTenant(session, async (tx) => {
-    const criticalRows = await tx
-      .select({ n: count() })
-      .from(exceptions)
-      .where(and(eq(exceptions.organizationId, orgId), eq(exceptions.severity, "CRITICAL"), eq(exceptions.status, "OPEN")));
-    const approvalRows = await tx
-      .select({ n: count() })
-      .from(approvals)
-      .where(and(eq(approvals.organizationId, orgId), eq(approvals.status, "PENDING")));
-    const organizationRows = await tx.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
-    return { criticalRows, approvalRows, organizationRows };
-  });
+  const { criticalRows, approvalRows, organizationRows } = await withSessionTenant(
+    session,
+    async (tx) => {
+      const criticalRows = await tx
+        .select({ n: count() })
+        .from(exceptions)
+        .where(
+          and(
+            eq(exceptions.organizationId, orgId),
+            eq(exceptions.severity, "CRITICAL"),
+            eq(exceptions.status, "OPEN"),
+          ),
+        );
+      const approvalRows = await tx
+        .select({ n: count() })
+        .from(approvals)
+        .where(and(eq(approvals.organizationId, orgId), eq(approvals.status, "PENDING")));
+      const organizationRows = await tx
+        .select({ name: organizations.name })
+        .from(organizations)
+        .where(eq(organizations.id, orgId))
+        .limit(1);
+      return { criticalRows, approvalRows, organizationRows };
+    },
+  );
 
   return (
     <div className="flex h-screen overflow-hidden">

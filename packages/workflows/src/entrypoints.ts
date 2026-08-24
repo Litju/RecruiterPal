@@ -23,30 +23,50 @@ export async function schedulingResolutionWorkflow(input: WorkflowInput): Promis
   return executeWorkflowStep(normalized);
 }
 
-export async function interviewerDeclineReplacementWorkflow(input: WorkflowInput): Promise<WorkflowResult> {
+export async function interviewerDeclineReplacementWorkflow(
+  input: WorkflowInput,
+): Promise<WorkflowResult> {
   "use workflow";
-  const normalized = normalizeWorkflowInput({ ...input, workflowType: "interviewer_decline_replacement" });
+  const normalized = normalizeWorkflowInput({
+    ...input,
+    workflowType: "interviewer_decline_replacement",
+  });
   if (normalized.resumeAt) await sleep(normalized.resumeAt);
   return executeWorkflowStep(normalized);
 }
 
-export async function integrationReconciliationWorkflow(input: WorkflowInput): Promise<WorkflowResult> {
+export async function integrationReconciliationWorkflow(
+  input: WorkflowInput,
+): Promise<WorkflowResult> {
   "use workflow";
-  const normalized = normalizeWorkflowInput({ ...input, workflowType: "integration_reconciliation" });
+  const normalized = normalizeWorkflowInput({
+    ...input,
+    workflowType: "integration_reconciliation",
+  });
   if (normalized.resumeAt) await sleep(normalized.resumeAt);
   return executeWorkflowStep(normalized);
 }
 
-export async function staleExceptionReconciliationWorkflow(input: WorkflowInput): Promise<WorkflowResult> {
+export async function staleExceptionReconciliationWorkflow(
+  input: WorkflowInput,
+): Promise<WorkflowResult> {
   "use workflow";
-  const normalized = normalizeWorkflowInput({ ...input, workflowType: "stale_exception_reconciliation" });
+  const normalized = normalizeWorkflowInput({
+    ...input,
+    workflowType: "stale_exception_reconciliation",
+  });
   if (normalized.resumeAt) await sleep(normalized.resumeAt);
   return executeWorkflowStep(normalized);
 }
 
-export async function deadlineCandidateEscalationWorkflow(input: WorkflowInput): Promise<WorkflowResult> {
+export async function deadlineCandidateEscalationWorkflow(
+  input: WorkflowInput,
+): Promise<WorkflowResult> {
   "use workflow";
-  const normalized = normalizeWorkflowInput({ ...input, workflowType: "deadline_candidate_escalation" });
+  const normalized = normalizeWorkflowInput({
+    ...input,
+    workflowType: "deadline_candidate_escalation",
+  });
   if (normalized.resumeAt) await sleep(normalized.resumeAt);
   return executeWorkflowStep(normalized);
 }

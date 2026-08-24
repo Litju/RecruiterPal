@@ -51,10 +51,7 @@ const SEVERITY_RANK: Record<ExceptionSeverity, number> = {
  * Priority ordering for Today: severity first; earlier deadline breaks ties.
  * Explicit business rules — no hidden ML ranking on this surface.
  */
-export function compareTodayPriority(
-  a: TodayPriorityItem,
-  b: TodayPriorityItem,
-): number {
+export function compareTodayPriority(a: TodayPriorityItem, b: TodayPriorityItem): number {
   const bySeverity = SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity];
   if (bySeverity !== 0) return bySeverity;
   if (a.deadlineAt && b.deadlineAt) {

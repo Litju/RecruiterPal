@@ -10,9 +10,7 @@ export const metadata: Metadata = {
     "The agent-driven workspace for evidence-based recruiting. Automate the administrative work. Structure the judgment. Preserve the evidence.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">{children}</body>

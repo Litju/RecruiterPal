@@ -20,15 +20,15 @@ RecruiterPal turns recruiting from a fragmented queue of manual coordination tas
 
 ## Architecture
 
-| Layer | Choice |
-| --- | --- |
-| Product | Next.js (App Router) + React + TypeScript strict |
-| Agent runtime | [Eve](https://eve.dev) behind `packages/agent-runtime` adapter boundary |
-| Model provider | OpenCode Go (`https://opencode.ai/zen/go/v1`, OpenAI Responses-compatible), env `OPENCODE_GO_API_KEY` |
-| Durable workflows | Vercel Workflow SDK |
-| Canonical state | PostgreSQL / Neon via Drizzle ORM |
-| Auth | Better Auth with organization-scoped RBAC |
-| UI | Tailwind CSS, shadcn/ui-class primitives, Motion |
+| Layer             | Choice                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| Product           | Next.js (App Router) + React + TypeScript strict                                                      |
+| Agent runtime     | [Eve](https://eve.dev) behind `packages/agent-runtime` adapter boundary                               |
+| Model provider    | OpenCode Go (`https://opencode.ai/zen/go/v1`, OpenAI Responses-compatible), env `OPENCODE_GO_API_KEY` |
+| Durable workflows | Vercel Workflow SDK                                                                                   |
+| Canonical state   | PostgreSQL / Neon via Drizzle ORM                                                                     |
+| Auth              | Better Auth with organization-scoped RBAC                                                             |
+| UI                | Tailwind CSS, shadcn/ui-class primitives, Motion                                                      |
 
 Core invariant: **deterministic code owns rules, permissions, calculations, mutations and authority; Vercel Workflow owns durable deterministic processes; Eve owns bounded agent reasoning; OpenCode Go provides the model; PostgreSQL owns truth; humans retain consequential hiring authority.**
 

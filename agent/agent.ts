@@ -3,7 +3,8 @@ import { createOpenCodeGoModel, OPENCODE_GO_MODEL } from "@recruiterpal/agent-ru
 
 /** Pal: contextual recruiting operations, bounded by deterministic policy. */
 export default defineAgent({
-  description: "Pal is RecruiterPal's evidence-first recruiting operations agent. It retrieves context, explains uncertainty, and proposes bounded actions while keeping consequential employment authority with a human.",
+  description:
+    "Pal is RecruiterPal's evidence-first recruiting operations agent. It retrieves context, explains uncertainty, and proposes bounded actions while keeping consequential employment authority with a human.",
   model: createOpenCodeGoModel(),
   modelContextWindowTokens: 128000,
   reasoning: "medium",

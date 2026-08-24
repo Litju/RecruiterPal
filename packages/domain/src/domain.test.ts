@@ -129,9 +129,9 @@ describe("decision readiness", () => {
   });
 
   it("is NOT_APPLICABLE for terminal applications", () => {
-    expect(
-      computeDecisionReadiness({ ...base, applicationStatus: "REJECTED" }).status,
-    ).toBe("NOT_APPLICABLE");
+    expect(computeDecisionReadiness({ ...base, applicationStatus: "REJECTED" }).status).toBe(
+      "NOT_APPLICABLE",
+    );
   });
 });
 

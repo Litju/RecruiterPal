@@ -14,7 +14,10 @@ const checks: Array<[string, boolean]> = [
   ["never auto hire", !agentMayPropose("hire_candidate", "A3")],
   ["protected attribute isolation", protectedFieldIsIsolated("protected_demographics")],
   ["cross-tenant access forbidden", !contextsShareTenant("org-a", "org-b")],
-  ["forbidden transition rejected", !validAgentStageProposal(["APPLIED", "SCREEN", "DECISION"], "APPLIED", "DECISION")],
+  [
+    "forbidden transition rejected",
+    !validAgentStageProposal(["APPLIED", "SCREEN", "DECISION"], "APPLIED", "DECISION"),
+  ],
   ["missing scorecard escalation", scorecardRequiresEscalation(1, 2, true)],
   ["material conflict escalated", materialConflictRequiresReview(1)],
   ["unsupported evidence not invented", !evidenceClaimIsSupported("unsupported", ["recorded"])],

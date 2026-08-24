@@ -37,17 +37,79 @@ function pickInt(rng: () => number, minInclusive: number, maxInclusive: number):
 }
 
 const FIRST_NAMES = [
-  "Ava", "Noah", "Mia", "Liam", "Zoe", "Ethan", "Ivy", "Owen", "Nina", "Felix",
-  "Ruth", "Jonas", "Clara", "Marcus", "Priya", "Diego", "Hana", "Tomas", "Leila", "Victor",
-  "Sofia", "Mateo", "Amara", "Kenji", "Freya", "Omar", "Ingrid", "Ravi", "Elena", "Sam",
-  "Talia", "Bruno", "Yuki", "Carla", "Dmitri", "Nadia", "Peter", "Quinn", "Rosa", "Stefan",
+  "Ava",
+  "Noah",
+  "Mia",
+  "Liam",
+  "Zoe",
+  "Ethan",
+  "Ivy",
+  "Owen",
+  "Nina",
+  "Felix",
+  "Ruth",
+  "Jonas",
+  "Clara",
+  "Marcus",
+  "Priya",
+  "Diego",
+  "Hana",
+  "Tomas",
+  "Leila",
+  "Victor",
+  "Sofia",
+  "Mateo",
+  "Amara",
+  "Kenji",
+  "Freya",
+  "Omar",
+  "Ingrid",
+  "Ravi",
+  "Elena",
+  "Sam",
+  "Talia",
+  "Bruno",
+  "Yuki",
+  "Carla",
+  "Dmitri",
+  "Nadia",
+  "Peter",
+  "Quinn",
+  "Rosa",
+  "Stefan",
 ] as const;
 
 const LAST_NAMES = [
-  "Alvarez", "Bergström", "Chen", "Dubois", "Eriksen", "Fontaine", "Garcia", "Haddad",
-  "Ivanova", "Jensen", "Kowalski", "Laurent", "Moreau", "Novak", "Okafor", "Petrov",
-  "Quintero", "Rossi", "Silva", "Tanaka", "Ueda", "Vargas", "Weber", "Xu", "Young",
-  "Zimmerman", "Adeyemi", "Bianchi", "Castillo", "Duarte",
+  "Alvarez",
+  "Bergström",
+  "Chen",
+  "Dubois",
+  "Eriksen",
+  "Fontaine",
+  "Garcia",
+  "Haddad",
+  "Ivanova",
+  "Jensen",
+  "Kowalski",
+  "Laurent",
+  "Moreau",
+  "Novak",
+  "Okafor",
+  "Petrov",
+  "Quintero",
+  "Rossi",
+  "Silva",
+  "Tanaka",
+  "Ueda",
+  "Vargas",
+  "Weber",
+  "Xu",
+  "Young",
+  "Zimmerman",
+  "Adeyemi",
+  "Bianchi",
+  "Castillo",
+  "Duarte",
 ] as const;
 
 const HEADLINES = [
@@ -127,7 +189,12 @@ export async function seedDemoWorld(
     // ---- People ------------------------------------------------------------
     const passwordNote = "demo-only accounts";
     void passwordNote;
-    async function insertUser(name: string, email: string, role: string, org: string): Promise<SeedUser> {
+    async function insertUser(
+      name: string,
+      email: string,
+      role: string,
+      org: string,
+    ): Promise<SeedUser> {
       const [u] = await tx
         .insert(s.users)
         .values({ name, email, emailVerified: true })
@@ -136,7 +203,12 @@ export async function seedDemoWorld(
       return { id: u!.id, name, email, role };
     }
 
-    const lead = await insertUser("Jordan Reyes", "jordan.reyes@northstar-labs.example", "admin", orgId);
+    const lead = await insertUser(
+      "Jordan Reyes",
+      "jordan.reyes@northstar-labs.example",
+      "admin",
+      orgId,
+    );
     const recruiters: SeedUser[] = [];
     const recruiterNames = [
       ["Casey Lin", "casey.lin@northstar-labs.example"],
@@ -160,7 +232,12 @@ export async function seedDemoWorld(
     }
 
     // Security-test tenant: one isolated user, no shared rows.
-    await insertUser("Alex Meridian", "alex.meridian@meridian-compliance.example", "owner", secOrgId);
+    await insertUser(
+      "Alex Meridian",
+      "alex.meridian@meridian-compliance.example",
+      "owner",
+      secOrgId,
+    );
 
     // Credential accounts so demo users can actually sign in (synthetic only).
     const demoPasswordHash = await hashPassword(DEMO_PASSWORD);
@@ -201,21 +278,72 @@ export async function seedDemoWorld(
 
     // ---- Jobs + protocols ---------------------------------------------------
     const jobSpecs = [
-      { title: "Senior ML Engineer", department: "Applied Science", openDaysAgo: 75, status: "OPEN", drift: false },
-      { title: "Staff Backend Engineer", department: "Platform", openDaysAgo: 60, status: "OPEN", drift: false },
-      { title: "Data Scientist", department: "Analytics", openDaysAgo: 55, status: "OPEN", drift: true },
-      { title: "Senior Product Engineer", department: "Product", openDaysAgo: 48, status: "OPEN", drift: false },
-      { title: "Data Engineer", department: "Data Platform", openDaysAgo: 40, status: "OPEN", drift: false },
-      { title: "Security Engineer", department: "Infrastructure", openDaysAgo: 33, status: "ON_HOLD", drift: false },
-      { title: "Engineering Manager", department: "Platform", openDaysAgo: 28, status: "OPEN", drift: false },
-      { title: "Quantitative Researcher", department: "Applied Science", openDaysAgo: 20, status: "OPEN", drift: false },
+      {
+        title: "Senior ML Engineer",
+        department: "Applied Science",
+        openDaysAgo: 75,
+        status: "OPEN",
+        drift: false,
+      },
+      {
+        title: "Staff Backend Engineer",
+        department: "Platform",
+        openDaysAgo: 60,
+        status: "OPEN",
+        drift: false,
+      },
+      {
+        title: "Data Scientist",
+        department: "Analytics",
+        openDaysAgo: 55,
+        status: "OPEN",
+        drift: true,
+      },
+      {
+        title: "Senior Product Engineer",
+        department: "Product",
+        openDaysAgo: 48,
+        status: "OPEN",
+        drift: false,
+      },
+      {
+        title: "Data Engineer",
+        department: "Data Platform",
+        openDaysAgo: 40,
+        status: "OPEN",
+        drift: false,
+      },
+      {
+        title: "Security Engineer",
+        department: "Infrastructure",
+        openDaysAgo: 33,
+        status: "ON_HOLD",
+        drift: false,
+      },
+      {
+        title: "Engineering Manager",
+        department: "Platform",
+        openDaysAgo: 28,
+        status: "OPEN",
+        drift: false,
+      },
+      {
+        title: "Quantitative Researcher",
+        department: "Applied Science",
+        openDaysAgo: 20,
+        status: "OPEN",
+        drift: false,
+      },
     ];
 
     const jobsOut: DemoWorldIds["jobs"] = [];
     let sofiaAppIdGlobal: string | null = null;
 
     function stagesFor(spec: (typeof jobSpecs)[number]) {
-      return STAGES.map((name) => ({ name, required: REQUIRED_STAGES.includes(name as never) || name === "OFFER" }));
+      return STAGES.map((name) => ({
+        name,
+        required: REQUIRED_STAGES.includes(name as never) || name === "OFFER",
+      }));
     }
 
     for (let ji = 0; ji < jobSpecs.length; ji++) {
@@ -278,7 +406,10 @@ export async function seedDemoWorld(
             status: "APPROVED",
             rolePurpose: `Hire an exceptional ${spec.title} for ${spec.department}.`,
             criticalTasks: [`Own ${spec.title.toLowerCase()} deliverables end to end`],
-            mustHaveRequirements: ["5+ years applied statistics", "Causal inference experience (added)"],
+            mustHaveRequirements: [
+              "5+ years applied statistics",
+              "Causal inference experience (added)",
+            ],
             trainableRequirements: ["Specific domain tooling"],
             stages: stageList,
             approvedByUserId: lead.id,
@@ -300,7 +431,10 @@ export async function seedDemoWorld(
         });
       }
 
-      await tx.update(s.jobs).set({ activeProtocolVersionId: activeVersionId }).where(eqJob(job!.id));
+      await tx
+        .update(s.jobs)
+        .set({ activeProtocolVersionId: activeVersionId })
+        .where(eqJob(job!.id));
 
       // Protocol competencies
       const requiredComps = competencyNames.slice(0, 5);
@@ -335,7 +469,12 @@ export async function seedDemoWorld(
         .returning({ id: s.scorecardTemplates.id });
       const templateId = tmpl!.id;
 
-      jobsOut.push({ id: job!.id, title: spec.title, protocolVersionId: activeVersionId, status: spec.status });
+      jobsOut.push({
+        id: job!.id,
+        title: spec.title,
+        protocolVersionId: activeVersionId,
+        status: spec.status,
+      });
 
       // ---- Applications ----------------------------------------------------
       const targetApps = spec.status === "OPEN" ? pickInt(rng, 14, 24) : 6;
@@ -346,7 +485,8 @@ export async function seedDemoWorld(
         const lastIdx = Math.floor(rng() * LAST_NAMES.length);
         const firstName =
           spec.title === "Senior ML Engineer" && ai === 0 ? "Sofia" : FIRST_NAMES[firstIdx]!;
-        const lastName = spec.title === "Senior ML Engineer" && ai === 0 ? "Martinez" : LAST_NAMES[lastIdx]!;
+        const lastName =
+          spec.title === "Senior ML Engineer" && ai === 0 ? "Martinez" : LAST_NAMES[lastIdx]!;
 
         const [candidate] = await tx
           .insert(s.candidates)
@@ -407,7 +547,12 @@ export async function seedDemoWorld(
         }
 
         // ---- Interviews / scorecards --------------------------------------
-        const needsInterviews = ["TECHNICAL_ASSESSMENT", "INTERVIEW_LOOP", "DECISION", "OFFER"].includes(stage);
+        const needsInterviews = [
+          "TECHNICAL_ASSESSMENT",
+          "INTERVIEW_LOOP",
+          "DECISION",
+          "OFFER",
+        ].includes(stage);
         if (needsInterviews) {
           const interviewCount = stage === "DECISION" || stage === "OFFER" ? 3 : pickInt(rng, 1, 2);
           for (let ii = 0; ii < interviewCount; ii++) {
@@ -450,7 +595,8 @@ export async function seedDemoWorld(
 
             if (completed) {
               // Golden G2: one specific completed interview is missing a scorecard past SLA.
-              const missingScorecardScenario = spec.title === "Staff Backend Engineer" && ai === 0 && ii === 0;
+              const missingScorecardScenario =
+                spec.title === "Staff Backend Engineer" && ai === 0 && ii === 0;
               for (let pi = 0; pi < panel.length; pi++) {
                 const rater = panel[pi]!;
                 const skip = missingScorecardScenario && pi === 0;
@@ -529,7 +675,11 @@ export async function seedDemoWorld(
       if (sofiaApplicationId) {
         await tx
           .update(s.applications)
-          .set({ currentStage: "DECISION", candidateDeadlineAt: new Date(now.getTime() + day), deadlineVerified: "UNVERIFIED" })
+          .set({
+            currentStage: "DECISION",
+            candidateDeadlineAt: new Date(now.getTime() + day),
+            deadlineVerified: "UNVERIFIED",
+          })
           .where(eqApp(sofiaApplicationId));
         await tx.insert(s.exceptions).values({
           organizationId: orgId,

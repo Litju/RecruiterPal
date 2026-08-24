@@ -72,7 +72,9 @@ export function computeDecisionReadiness(input: ReadinessInput): DecisionReadine
   if (input.applicationStatus !== "ACTIVE") {
     return {
       status: "NOT_APPLICABLE",
-      reasons: [`Application status ${input.applicationStatus} is terminal; readiness does not apply.`],
+      reasons: [
+        `Application status ${input.applicationStatus} is terminal; readiness does not apply.`,
+      ],
       missingEvidence: [],
       conflicts: [],
       missingApprovals: [],
@@ -95,12 +97,8 @@ export function computeDecisionReadiness(input: ReadinessInput): DecisionReadine
       : `Incomplete stages: ${input.incompleteStageNames.join(", ")}.`,
   });
   if (!input.requiredStagesComplete) {
-    reasons.push(
-      `Required stages incomplete: ${input.incompleteStageNames.join(", ")}.`,
-    );
-    missingEvidence.push(
-      ...input.incompleteStageNames.map((s) => `stage:${s}:completion`),
-    );
+    reasons.push(`Required stages incomplete: ${input.incompleteStageNames.join(", ")}.`);
+    missingEvidence.push(...input.incompleteStageNames.map((s) => `stage:${s}:completion`));
   }
 
   checks.push({
@@ -156,9 +154,7 @@ export function computeDecisionReadiness(input: ReadinessInput): DecisionReadine
         : conflicts.map((c) => c.description).join(" "),
   });
   if (conflicts.length > 0) {
-    reasons.push(
-      `Material rating conflict(s): ${conflicts.map((c) => c.description).join("; ")}`,
-    );
+    reasons.push(`Material rating conflict(s): ${conflicts.map((c) => c.description).join("; ")}`);
   }
 
   checks.push({

@@ -55,11 +55,7 @@ export function canTransitionStage(edges: StageEdgeMap, from: string, to: string
   return allowed.includes(to);
 }
 
-export function assertStageTransition(
-  edges: StageEdgeMap,
-  from: string,
-  to: string,
-): void {
+export function assertStageTransition(edges: StageEdgeMap, from: string, to: string): void {
   if (!canTransitionStage(edges, from, to)) {
     throw new IllegalTransitionError("application_stage", from, to);
   }

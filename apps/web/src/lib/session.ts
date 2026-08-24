@@ -20,9 +20,8 @@ export async function getSession(auth: Auth): Promise<PalSession | null> {
   const result = await auth.api.getSession({ headers: headerList });
   if (!result?.user) return null;
 
-  let activeOrganizationId = (
-    result.session as unknown as { activeOrganizationId?: string | null }
-  ).activeOrganizationId;
+  let activeOrganizationId = (result.session as unknown as { activeOrganizationId?: string | null })
+    .activeOrganizationId;
 
   const adapter = (await auth.$context).adapter;
   const membershipWhere = [{ field: "userId", value: result.user.id }];

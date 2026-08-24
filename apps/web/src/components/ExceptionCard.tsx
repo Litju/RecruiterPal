@@ -51,9 +51,7 @@ export function ExceptionCard({ exception }: { exception: TodayExceptionRow }) {
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="text-[14px] font-semibold leading-snug">{exception.title}</h3>
-          <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
-            {exception.detail}
-          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">{exception.detail}</p>
           <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-text-tertiary">
             <span className="uppercase tracking-wide">{exception.type.replace(/_/g, " ")}</span>
             {deadline ? (
@@ -122,9 +120,7 @@ export function ExceptionSection({
         {title}
         <span className="ml-2 tabular text-text-tertiary">{exceptions.length}</span>
       </h2>
-      {description ? (
-        <p className="mb-2 text-[12px] text-text-tertiary">{description}</p>
-      ) : null}
+      {description ? <p className="mb-2 text-[12px] text-text-tertiary">{description}</p> : null}
       <div className="space-y-2">
         {exceptions.map((e) => (
           <ExceptionCard key={e.id} exception={e} />

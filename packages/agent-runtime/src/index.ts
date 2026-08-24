@@ -26,7 +26,8 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const AGENT_RUNTIME_VERSION = "0.2.0";
-export const OPENCODE_GO_ENDPOINT = process.env.OPENCODE_GO_BASE_URL ?? "https://opencode.ai/zen/go/v1";
+export const OPENCODE_GO_ENDPOINT =
+  process.env.OPENCODE_GO_BASE_URL ?? "https://opencode.ai/zen/go/v1";
 export const OPENCODE_GO_PROTOCOL = "responses" as const;
 export const OPENCODE_GO_MODEL = "gpt-5.6-luna" as const;
 export const AGENT_PROMPT_VERSION = "pal-1.0.0";
@@ -88,7 +89,11 @@ function authAttributes(ctx: ToolContext): Readonly<Record<string, string | read
  * The model supplies resource intent only; organization, actor, role, and
  * permissions are taken from the authenticated session and checked here.
  */
-export function assertAgentAccess(ctx: ToolContext, rawInput: AgentContextInput, required: Permission): AgentAccess {
+export function assertAgentAccess(
+  ctx: ToolContext,
+  rawInput: AgentContextInput,
+  required: Permission,
+): AgentAccess {
   const input = agentContextInputSchema.parse(rawInput);
   const auth = ctx.session.auth.current;
   if (!auth) throw new Error("AGENT_CONTEXT_REQUIRED");
@@ -97,7 +102,11 @@ export function assertAgentAccess(ctx: ToolContext, rawInput: AgentContextInput,
   const actorUserId = attributeList(attrs.userId)[0] ?? auth.principalId;
   const roles = attributeList(attrs.roles ?? attrs.role);
   const claimedPermissions = attributeList(attrs.permissions);
-  if (!organizationId || organizationId !== input.organizationId || actorUserId !== input.actorUserId) {
+  if (
+    !organizationId ||
+    organizationId !== input.organizationId ||
+    actorUserId !== input.actorUserId
+  ) {
     throw new Error("AGENT_CONTEXT_MISMATCH");
   }
   if (!roles.includes(input.role)) throw new Error("AGENT_ROLE_REQUIRED");
@@ -120,7 +129,10 @@ export function assertAgentAccess(ctx: ToolContext, rawInput: AgentContextInput,
   };
 }
 
-export function buildApplicationContext(access: AgentAccess, correlationId?: string): ApplicationContext {
+export function buildApplicationContext(
+  access: AgentAccess,
+  correlationId?: string,
+): ApplicationContext {
   return { tenant: access.tenant, actor: access.actor, correlationId };
 }
 
@@ -152,7 +164,11 @@ export async function createAgentSession(
   });
 }
 
-export async function finishAgentSession(db: RecruiterPalDb, tenant: TenantContext, sessionId: string): Promise<void> {
+export async function finishAgentSession(
+  db: RecruiterPalDb,
+  tenant: TenantContext,
+  sessionId: string,
+): Promise<void> {
   await withTenant(db, tenant, async (tx) => {
     await tx
       .update(s.agentSessions)
@@ -217,10 +233,18 @@ export function completedPalResponse(input: {
   });
 }
 
-const hiddenReasoningNames = new Set(["reasoning.started", "reasoning.delta", "reasoning.completed"]);
+const hiddenReasoningNames = new Set([
+  "reasoning.started",
+  "reasoning.delta",
+  "reasoning.completed",
+]);
 
 /** Map Eve lifecycle events to the public, non-chain-of-thought stream. */
-export function mapEveEvent(event: { type?: string; name?: string; toolName?: string; detail?: string }, sessionId: string, seq: number): AgentEvent | null {
+export function mapEveEvent(
+  event: { type?: string; name?: string; toolName?: string; detail?: string },
+  sessionId: string,
+  seq: number,
+): AgentEvent | null {
   const name = event.type ?? event.name ?? "";
   if (hiddenReasoningNames.has(name)) return null;
   const mapped = name.includes("approval")

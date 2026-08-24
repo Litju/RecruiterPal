@@ -20,6 +20,7 @@ build/
 coverage/
 playwright-report/
 test-results/
+output/
 .pgdata/
 
 # python (optional science service)

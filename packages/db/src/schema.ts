@@ -72,9 +72,7 @@ export const accounts = pgTable("accounts", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  issuer: varchar("issuer", { length: 255 })
-    .notNull()
-    .default("local:credential"),
+  issuer: varchar("issuer", { length: 255 }).notNull().default("local:credential"),
   providerId: varchar("provider_id", { length: 100 }).notNull(),
   accountId: varchar("account_id", { length: 255 }).notNull(),
   password: text("password_hash"),
@@ -325,7 +323,9 @@ export const applicationObligations = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "cascade" }),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "cascade",
+    }),
     interviewId: uuid("interview_id"),
     obligationType: varchar("obligation_type", { length: 80 }).notNull(), // SCORECARD_SUBMISSION|CANDIDATE_RESPONSE|HM_REVIEW|...
     responsibleUserId: uuid("responsible_user_id").references(() => users.id),
@@ -511,7 +511,9 @@ export const evidenceArtifacts = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "cascade" }),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "cascade",
+    }),
     kind: varchar("kind", { length: 60 }).notNull(),
     reference: varchar("reference", { length: 400 }).notNull(),
     createdAt: createdAt(),
@@ -561,7 +563,9 @@ export const decisionRecords = pgTable(
     decidedByUserId: uuid("decided_by_user_id")
       .notNull()
       .references(() => users.id),
-    readinessSnapshotId: uuid("readiness_snapshot_id").references(() => decisionReadinessSnapshots.id),
+    readinessSnapshotId: uuid("readiness_snapshot_id").references(
+      () => decisionReadinessSnapshots.id,
+    ),
     rationale: text("rationale"),
     createdAt: createdAt(),
   },
@@ -579,7 +583,9 @@ export const communicationThreads = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "set null",
+    }),
     subject: varchar("subject", { length: 300 }),
     channel: varchar("channel", { length: 40 }).notNull().default("EMAIL"),
     externalThreadId: varchar("external_thread_id", { length: 255 }),
@@ -625,7 +631,9 @@ export const extractedFacts = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
     messageId: uuid("message_id").references(() => messages.id, { onDelete: "cascade" }),
-    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "cascade" }),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "cascade",
+    }),
     factType: varchar("fact_type", { length: 80 }).notNull(), // COMPETING_OFFER_DEADLINE|START_DATE_CONSTRAINT|QUESTION|OTHER
     normalizedValue: jsonb("normalized_value").$type<unknown>(),
     confidence: varchar("confidence", { length: 20 }),
@@ -690,7 +698,9 @@ export const exceptions = pgTable(
     type: varchar("type", { length: 60 }).notNull(),
     severity: varchar("severity", { length: 20 }).notNull().default("MEDIUM"),
     jobId: uuid("job_id").references(() => jobs.id, { onDelete: "cascade" }),
-    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "cascade" }),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "cascade",
+    }),
     interviewId: uuid("interview_id").references(() => interviews.id, { onDelete: "set null" }),
     title: varchar("title", { length: 300 }).notNull(),
     detail: text("detail").notNull(),
@@ -698,7 +708,9 @@ export const exceptions = pgTable(
     status: varchar("status", { length: 40 }).notNull().default("OPEN"),
     deadlineAt: timestamp("deadline_at", { withTimezone: true }),
     firstSeenAt: createdAt(),
-    lastRecomputedAt: timestamp("last_recomputed_at", { withTimezone: true }).notNull().defaultNow(),
+    lastRecomputedAt: timestamp("last_recomputed_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     resolutionReason: text("resolution_reason"),
   },
@@ -785,7 +797,11 @@ export const workflowInstances = pgTable(
     lastError: text("last_error"),
   },
   (t) => [
-    uniqueIndex("workflow_instances_org_type_obj_idx").on(t.organizationId, t.workflowType, t.businessObjectId),
+    uniqueIndex("workflow_instances_org_type_obj_idx").on(
+      t.organizationId,
+      t.workflowType,
+      t.businessObjectId,
+    ),
   ],
 );
 
@@ -971,7 +987,9 @@ export const agentActionProposals = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    agentSessionId: uuid("agent_session_id").references(() => agentSessions.id, { onDelete: "set null" }),
+    agentSessionId: uuid("agent_session_id").references(() => agentSessions.id, {
+      onDelete: "set null",
+    }),
     actionId: uuid("action_id")
       .notNull()
       .references(() => actions.id, { onDelete: "cascade" }),
@@ -988,7 +1006,9 @@ export const agentFeedback = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    agentSessionId: uuid("agent_session_id").references(() => agentSessions.id, { onDelete: "cascade" }),
+    agentSessionId: uuid("agent_session_id").references(() => agentSessions.id, {
+      onDelete: "cascade",
+    }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -1022,5 +1042,4 @@ export const protectedDemographics = pgTable(
 );
 
 // Convenience: expression for candidate search text kept consistent on write.
-export const candidateSearchExpr =
-  sql`coalesce(${candidates.firstName}, '') || ' ' || coalesce(${candidates.lastName}, '') || ' ' || coalesce(${candidates.headline}, '')`;
+export const candidateSearchExpr = sql`coalesce(${candidates.firstName}, '') || ' ' || coalesce(${candidates.lastName}, '') || ' ' || coalesce(${candidates.headline}, '')`;

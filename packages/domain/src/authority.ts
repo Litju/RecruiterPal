@@ -134,10 +134,7 @@ export function hasPermission(actor: ActorContext, permission: Permission): bool
  * Consequential employment decisions are human-only regardless of permission:
  * an agent-originated context can never satisfy them.
  */
-export function assertHumanAuthority(
-  actor: ActorContext,
-  permission: Permission,
-): void {
+export function assertHumanAuthority(actor: ActorContext, permission: Permission): void {
   if (actor.origin !== "human") {
     throw new UnauthorizedError(
       permission,

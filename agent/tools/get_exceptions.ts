@@ -9,15 +9,23 @@ import { and, eq, inArray, desc } from "drizzle-orm";
 const inputSchema = baseToolInput.extend({ applicationId: z.string().uuid().optional() });
 
 export default defineTool({
-  description: "Read open recruiting exceptions for the organization or one application, including deadlines and severity.",
+  description:
+    "Read open recruiting exceptions for the organization or one application, including deadlines and severity.",
   inputSchema,
   outputSchema: listOutput,
   async execute(input, ctx) {
     const access = authorizeTool(ctx, input, PERMISSIONS.EXCEPTION_READ, "A0");
     return readWithTenant(access, async (tx) => {
-      const filters = [eq(s.exceptions.organizationId, access.tenant.organizationId), inArray(s.exceptions.status, ["OPEN", "ACKNOWLEDGED", "WAITING_HUMAN"])];
+      const filters = [
+        eq(s.exceptions.organizationId, access.tenant.organizationId),
+        inArray(s.exceptions.status, ["OPEN", "ACKNOWLEDGED", "WAITING_HUMAN"]),
+      ];
       if (input.applicationId) filters.push(eq(s.exceptions.applicationId, input.applicationId));
-      const exceptions = await tx.select().from(s.exceptions).where(and(...filters)).orderBy(desc(s.exceptions.deadlineAt));
+      const exceptions = await tx
+        .select()
+        .from(s.exceptions)
+        .where(and(...filters))
+        .orderBy(desc(s.exceptions.deadlineAt));
       return { ok: true, data: { exceptions } };
     });
   },

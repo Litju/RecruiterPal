@@ -17,16 +17,19 @@
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
     "test:db": "pnpm --filter @recruiterpal/db test:db && pnpm --filter @recruiterpal/application test:db && pnpm --filter @recruiterpal/workflows test:db && pnpm --filter @recruiterpal/agent-runtime test:db",
-    "test:e2e": "turbo run test:e2e",
+    "test:e2e": "playwright test",
     "test:workflows": "turbo run test:workflows",
     "evals": "turbo run evals",
     "db:generate": "pnpm --filter @recruiterpal/db generate",
     "db:migrate": "pnpm --filter @recruiterpal/db migrate",
     "db:seed": "pnpm --filter @recruiterpal/db seed",
     "scan:secrets": "node scripts/scan-secrets.mjs",
-    "scan:clean-room": "node scripts/scan-clean-room.mjs"
+    "scan:clean-room": "node scripts/scan-clean-room.mjs",
+    "qa:fast": "node scripts/qa-fast.mjs",
+    "qa:full": "pnpm qa:fast && pnpm test:e2e"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@recruiterpal/tsconfig": "workspace:*",
     "eslint": "9.39.5",
     "lefthook": "^1.13.6",
@@ -36,6 +39,11 @@
     "typescript": "5.9.3"
   },
   "pnpm": {
+    "overrides": {
+      "esbuild": "0.25.12",
+      "nanoid": "5.1.16",
+      "undici": "7.29.0"
+    },
     "onlyBuiltDependencies": [
       "@swc/core",
       "cbor-extract",

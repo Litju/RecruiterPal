@@ -10,26 +10,28 @@ export const metadata = { title: "Jobs" };
 export default async function JobsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const rows = await withSessionTenant(session, (tx) => tx
-    .select({
-      id: jobs.id,
-      title: jobs.title,
-      department: jobs.department,
-      status: jobs.status,
-      locationMode: jobs.locationMode,
-      openedAt: jobs.openedAt,
-      ownerName: users.name,
-      activeApplications: count(applications.id),
-    })
-    .from(jobs)
-    .leftJoin(users, eq(users.id, jobs.ownerRecruiterId))
-    .leftJoin(
-      applications,
-      and(eq(applications.jobId, jobs.id), eq(applications.status, "ACTIVE")),
-    )
-    .where(eq(jobs.organizationId, session.organizationId))
-    .groupBy(jobs.id, users.name)
-    .orderBy(jobs.createdAt));
+  const rows = await withSessionTenant(session, (tx) =>
+    tx
+      .select({
+        id: jobs.id,
+        title: jobs.title,
+        department: jobs.department,
+        status: jobs.status,
+        locationMode: jobs.locationMode,
+        openedAt: jobs.openedAt,
+        ownerName: users.name,
+        activeApplications: count(applications.id),
+      })
+      .from(jobs)
+      .leftJoin(users, eq(users.id, jobs.ownerRecruiterId))
+      .leftJoin(
+        applications,
+        and(eq(applications.jobId, jobs.id), eq(applications.status, "ACTIVE")),
+      )
+      .where(eq(jobs.organizationId, session.organizationId))
+      .groupBy(jobs.id, users.name)
+      .orderBy(jobs.createdAt),
+  );
 
   return (
     <div className="flex h-full flex-col">

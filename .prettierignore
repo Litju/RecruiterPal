@@ -1,0 +1,6 @@
+docs/build-contract/
+apps/web/src/app/.well-known/workflow/
+packages/db/drizzle/meta/
+.codebase-memory/
+output/
+pnpm-lock.yaml

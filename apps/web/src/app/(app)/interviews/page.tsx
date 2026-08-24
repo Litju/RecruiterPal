@@ -11,27 +11,34 @@ export const metadata = { title: "Interviews" };
 export default async function InterviewsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const rows = await withSessionTenant(session, (tx) => tx
-    .select({
-      id: interviews.id,
-      label: interviews.label,
-      status: interviews.status,
-      start: interviews.scheduledStartAt,
-      candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
-      jobTitle: jobs.title,
-    })
-    .from(interviews)
-    .innerJoin(applications, eq(applications.id, interviews.applicationId))
-    .innerJoin(candidates, eq(candidates.id, applications.candidateId))
-    .innerJoin(jobs, eq(jobs.id, interviews.jobId))
-    .where(
-      and(
-        eq(interviews.organizationId, session.organizationId),
-        inArray(interviews.status, ["PLANNED", "AWAITING_AVAILABILITY", "SCHEDULED", "RESCHEDULE_REQUIRED"]),
-      ),
-    )
-    .orderBy(interviews.scheduledStartAt)
-    .limit(200));
+  const rows = await withSessionTenant(session, (tx) =>
+    tx
+      .select({
+        id: interviews.id,
+        label: interviews.label,
+        status: interviews.status,
+        start: interviews.scheduledStartAt,
+        candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
+        jobTitle: jobs.title,
+      })
+      .from(interviews)
+      .innerJoin(applications, eq(applications.id, interviews.applicationId))
+      .innerJoin(candidates, eq(candidates.id, applications.candidateId))
+      .innerJoin(jobs, eq(jobs.id, interviews.jobId))
+      .where(
+        and(
+          eq(interviews.organizationId, session.organizationId),
+          inArray(interviews.status, [
+            "PLANNED",
+            "AWAITING_AVAILABILITY",
+            "SCHEDULED",
+            "RESCHEDULE_REQUIRED",
+          ]),
+        ),
+      )
+      .orderBy(interviews.scheduledStartAt)
+      .limit(200),
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -46,12 +53,20 @@ export default async function InterviewsPage() {
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-medium">
-                  {i.candidateName} <span className="font-normal text-text-secondary">· {i.label}</span>
+                  {i.candidateName}{" "}
+                  <span className="font-normal text-text-secondary">· {i.label}</span>
                 </p>
                 <p className="text-[12px] text-text-tertiary">{i.jobTitle}</p>
               </div>
               <time className="shrink-0 text-[13px] tabular text-text-secondary">
-                {i.start ? i.start.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "unscheduled"}
+                {i.start
+                  ? i.start.toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })
+                  : "unscheduled"}
               </time>
               <span className="w-36 shrink-0 text-right text-[12px] font-medium text-info">
                 {i.status.replace(/_/g, " ")}

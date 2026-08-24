@@ -33,14 +33,10 @@ export interface FeasibleSlot {
   readonly participantIds: readonly string[];
 }
 
-function overlaps(
-  aStart: Date,
-  aEnd: Date,
-  bStart: Date,
-  bEnd: Date,
-  bufferMs = 0,
-): boolean {
-  return aStart.getTime() < bEnd.getTime() + bufferMs && bStart.getTime() - bufferMs < aEnd.getTime();
+function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date, bufferMs = 0): boolean {
+  return (
+    aStart.getTime() < bEnd.getTime() + bufferMs && bStart.getTime() - bufferMs < aEnd.getTime()
+  );
 }
 
 /**
@@ -77,7 +73,9 @@ export function computeFeasibleSlots(params: {
       const busy = params.busyWindows[pid] ?? [];
       const inWindow = windows.some((w) => w.startUtc <= start && w.endUtc >= end);
       if (windows.length > 0 && !inWindow) return false;
-      return !busy.some((b) => overlaps(b.startUtc, b.endUtc, start, end, c.bufferMinutes * 60_000));
+      return !busy.some((b) =>
+        overlaps(b.startUtc, b.endUtc, start, end, c.bufferMinutes * 60_000),
+      );
     });
     if (allAvailable) {
       slots.push({ startUtc: start, endUtc: end, participantIds: [...params.participantIds] });

@@ -17,12 +17,14 @@ const ACTOR_STYLE: Record<string, string> = {
 export default async function ActivityPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const records = await withSessionTenant(session, (tx) => tx
-    .select()
-    .from(auditRecords)
-    .where(eq(auditRecords.organizationId, session.organizationId))
-    .orderBy(desc(auditRecords.occurredAt))
-    .limit(200));
+  const records = await withSessionTenant(session, (tx) =>
+    tx
+      .select()
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, session.organizationId))
+      .orderBy(desc(auditRecords.occurredAt))
+      .limit(200),
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -57,7 +59,12 @@ export default async function ActivityPage() {
                     {r.authorityClass} · policy {r.policyVersion}
                   </span>
                   <time className="ml-auto text-[12px] tabular text-text-tertiary">
-                    {r.occurredAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                    {r.occurredAt.toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                   </time>
                 </div>
                 {r.outcome !== "SUCCEEDED" ? (

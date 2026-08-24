@@ -6,17 +6,81 @@ import * as s from "@recruiterpal/db/schema";
 import { and, eq, desc, inArray } from "drizzle-orm";
 
 export default defineTool({
-  description: "Read provenance-linked evidence observations, scorecards, and ratings for an application.",
+  description:
+    "Read provenance-linked evidence observations, scorecards, and ratings for an application.",
   inputSchema: idInput,
   outputSchema: listOutput,
   async execute(input, ctx) {
     const access = authorizeTool(ctx, input, PERMISSIONS.EVIDENCE_READ, "A0");
     return readWithTenant(access, async (tx) => {
-      const [application] = await tx.select({ id: s.applications.id, protocolVersionId: s.applications.protocolVersionId }).from(s.applications).where(and(eq(s.applications.id, input.id), eq(s.applications.organizationId, access.tenant.organizationId))).limit(1);
+      const [application] = await tx
+        .select({ id: s.applications.id, protocolVersionId: s.applications.protocolVersionId })
+        .from(s.applications)
+        .where(
+          and(
+            eq(s.applications.id, input.id),
+            eq(s.applications.organizationId, access.tenant.organizationId),
+          ),
+        )
+        .limit(1);
       if (!application) throw new Error("NOT_FOUND");
-      const observations = await tx.select({ id: s.evidenceObservations.id, competencyId: s.evidenceObservations.competencyId, sourceType: s.evidenceObservations.sourceType, sourceObjectId: s.evidenceObservations.sourceObjectId, observation: s.evidenceObservations.observation, rating: s.evidenceObservations.rating, provenance: s.evidenceObservations.provenance, observedAt: s.evidenceObservations.observedAt }).from(s.evidenceObservations).where(and(eq(s.evidenceObservations.applicationId, application.id), eq(s.evidenceObservations.organizationId, access.tenant.organizationId), eq(s.evidenceObservations.protocolVersionId, application.protocolVersionId))).orderBy(desc(s.evidenceObservations.observedAt));
-      const scorecards = await tx.select({ id: s.scorecards.id, interviewId: s.scorecards.interviewId, raterUserId: s.scorecards.raterUserId, status: s.scorecards.status, submittedAt: s.scorecards.submittedAt, protocolVersionId: s.scorecards.protocolVersionId }).from(s.scorecards).where(and(eq(s.scorecards.applicationId, application.id), eq(s.scorecards.organizationId, access.tenant.organizationId)));
-      const ratings = scorecards.length === 0 ? [] : await tx.select({ scorecardId: s.scorecardRatings.scorecardId, competencyId: s.scorecardRatings.competencyId, rating: s.scorecardRatings.rating, evidenceNote: s.scorecardRatings.evidenceNote, rubricAnchor: s.scorecardRatings.rubricAnchor }).from(s.scorecardRatings).where(and(eq(s.scorecardRatings.organizationId, access.tenant.organizationId), inArray(s.scorecardRatings.scorecardId, scorecards.map((scorecard) => scorecard.id))));
+      const observations = await tx
+        .select({
+          id: s.evidenceObservations.id,
+          competencyId: s.evidenceObservations.competencyId,
+          sourceType: s.evidenceObservations.sourceType,
+          sourceObjectId: s.evidenceObservations.sourceObjectId,
+          observation: s.evidenceObservations.observation,
+          rating: s.evidenceObservations.rating,
+          provenance: s.evidenceObservations.provenance,
+          observedAt: s.evidenceObservations.observedAt,
+        })
+        .from(s.evidenceObservations)
+        .where(
+          and(
+            eq(s.evidenceObservations.applicationId, application.id),
+            eq(s.evidenceObservations.organizationId, access.tenant.organizationId),
+            eq(s.evidenceObservations.protocolVersionId, application.protocolVersionId),
+          ),
+        )
+        .orderBy(desc(s.evidenceObservations.observedAt));
+      const scorecards = await tx
+        .select({
+          id: s.scorecards.id,
+          interviewId: s.scorecards.interviewId,
+          raterUserId: s.scorecards.raterUserId,
+          status: s.scorecards.status,
+          submittedAt: s.scorecards.submittedAt,
+          protocolVersionId: s.scorecards.protocolVersionId,
+        })
+        .from(s.scorecards)
+        .where(
+          and(
+            eq(s.scorecards.applicationId, application.id),
+            eq(s.scorecards.organizationId, access.tenant.organizationId),
+          ),
+        );
+      const ratings =
+        scorecards.length === 0
+          ? []
+          : await tx
+              .select({
+                scorecardId: s.scorecardRatings.scorecardId,
+                competencyId: s.scorecardRatings.competencyId,
+                rating: s.scorecardRatings.rating,
+                evidenceNote: s.scorecardRatings.evidenceNote,
+                rubricAnchor: s.scorecardRatings.rubricAnchor,
+              })
+              .from(s.scorecardRatings)
+              .where(
+                and(
+                  eq(s.scorecardRatings.organizationId, access.tenant.organizationId),
+                  inArray(
+                    s.scorecardRatings.scorecardId,
+                    scorecards.map((scorecard) => scorecard.id),
+                  ),
+                ),
+              );
       return { ok: true, data: { application, observations, scorecards, ratings } };
     });
   },

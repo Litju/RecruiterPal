@@ -4,8 +4,14 @@ import { createDb, schema, seedDemoWorld, withTenant, type DemoWorldIds } from "
 import { permissionsForRoles } from "@recruiterpal/domain";
 import { createAgentSession, finishAgentSession, type AgentAccess } from "../src";
 
-const adminUrl = process.env.RP_TEST_DATABASE_URL ?? process.env.DATABASE_URL ?? "postgresql://postgres:recruiterpal@localhost:5499/recruiterpal";
-const appUrl = process.env.RP_APP_TEST_DATABASE_URL ?? process.env.RP_APP_DATABASE_URL ?? "postgresql://rp_app:recruiterpal@localhost:5499/recruiterpal";
+const adminUrl =
+  process.env.RP_TEST_DATABASE_URL ??
+  process.env.DATABASE_URL ??
+  "postgresql://postgres:recruiterpal@localhost:5499/recruiterpal";
+const appUrl =
+  process.env.RP_APP_TEST_DATABASE_URL ??
+  process.env.RP_APP_DATABASE_URL ??
+  "postgresql://rp_app:recruiterpal@localhost:5499/recruiterpal";
 let admin: ReturnType<typeof createDb>;
 let app: ReturnType<typeof createDb>;
 let world: DemoWorldIds;
@@ -26,7 +32,13 @@ describe("Eve adapter persistence", () => {
     const userId = world.recruiters[0]!.id;
     const access: AgentAccess = {
       tenant: { organizationId: world.organizationId, userId },
-      actor: { userId, organizationId: world.organizationId, roles: ["recruiter"], permissions: permissionsForRoles(["recruiter"]), origin: "agent" },
+      actor: {
+        userId,
+        organizationId: world.organizationId,
+        roles: ["recruiter"],
+        permissions: permissionsForRoles(["recruiter"]),
+        origin: "agent",
+      },
       sessionId: "eve-session-db-test",
       context: {
         actorUserId: userId,
@@ -41,10 +53,29 @@ describe("Eve adapter persistence", () => {
       },
     };
     const id = await createAgentSession(app.db, access);
-    const [created] = await withTenant(app.db, access.tenant, (tx) => tx.select({ id: schema.agentSessions.id, eveSessionRef: schema.agentSessions.eveSessionRef, organizationId: schema.agentSessions.organizationId }).from(schema.agentSessions).where(and(eq(schema.agentSessions.id, id), eq(schema.agentSessions.eveSessionRef, access.sessionId))));
+    const [created] = await withTenant(app.db, access.tenant, (tx) =>
+      tx
+        .select({
+          id: schema.agentSessions.id,
+          eveSessionRef: schema.agentSessions.eveSessionRef,
+          organizationId: schema.agentSessions.organizationId,
+        })
+        .from(schema.agentSessions)
+        .where(
+          and(
+            eq(schema.agentSessions.id, id),
+            eq(schema.agentSessions.eveSessionRef, access.sessionId),
+          ),
+        ),
+    );
     expect(created?.organizationId).toBe(world.organizationId);
     await finishAgentSession(app.db, access.tenant, access.sessionId);
-    const [closed] = await withTenant(app.db, access.tenant, (tx) => tx.select({ endedAt: schema.agentSessions.endedAt }).from(schema.agentSessions).where(eq(schema.agentSessions.id, id)));
+    const [closed] = await withTenant(app.db, access.tenant, (tx) =>
+      tx
+        .select({ endedAt: schema.agentSessions.endedAt })
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, id)),
+    );
     expect(closed?.endedAt).toBeInstanceOf(Date);
   });
 });

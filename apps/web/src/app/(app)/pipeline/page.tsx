@@ -21,26 +21,28 @@ const STAGE_ORDER = [
 export default async function PipelinePage() {
   const session = await getSession(getAuth());
   if (!session) return null;
-  const rows = await withSessionTenant(session, (tx) => tx
-    .select({
-      id: applications.id,
-      stage: applications.currentStage,
-      candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
-      headline: candidates.headline,
-      jobTitle: jobs.title,
-      lastActivity: applications.lastActivityAt,
-    })
-    .from(applications)
-    .innerJoin(candidates, eq(candidates.id, applications.candidateId))
-    .innerJoin(jobs, eq(jobs.id, applications.jobId))
-    .where(
-      and(
-        eq(applications.organizationId, session.organizationId),
-        eq(applications.status, "ACTIVE"),
-      ),
-    )
-    .orderBy(applications.lastActivityAt)
-    .limit(500));
+  const rows = await withSessionTenant(session, (tx) =>
+    tx
+      .select({
+        id: applications.id,
+        stage: applications.currentStage,
+        candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
+        headline: candidates.headline,
+        jobTitle: jobs.title,
+        lastActivity: applications.lastActivityAt,
+      })
+      .from(applications)
+      .innerJoin(candidates, eq(candidates.id, applications.candidateId))
+      .innerJoin(jobs, eq(jobs.id, applications.jobId))
+      .where(
+        and(
+          eq(applications.organizationId, session.organizationId),
+          eq(applications.status, "ACTIVE"),
+        ),
+      )
+      .orderBy(applications.lastActivityAt)
+      .limit(500),
+  );
 
   const byStage = new Map<string, typeof rows>();
   for (const r of rows) {

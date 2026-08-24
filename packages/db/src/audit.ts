@@ -25,7 +25,11 @@ export interface AuditInput {
 }
 
 /** Write an audit record inside the current tenant-scoped transaction. */
-export async function writeAudit(tx: TenantTx, ctx: TenantContext, input: AuditInput): Promise<AuditRecord> {
+export async function writeAudit(
+  tx: TenantTx,
+  ctx: TenantContext,
+  input: AuditInput,
+): Promise<AuditRecord> {
   const occurredAt = new Date();
   const row = {
     organizationId: ctx.organizationId,
@@ -46,7 +50,10 @@ export async function writeAudit(tx: TenantTx, ctx: TenantContext, input: AuditI
     correlationId: input.correlationId ?? null,
     occurredAt,
   };
-  const [inserted] = await tx.insert(s.auditRecords).values(row).returning({ id: s.auditRecords.id });
+  const [inserted] = await tx
+    .insert(s.auditRecords)
+    .values(row)
+    .returning({ id: s.auditRecords.id });
 
   const record = auditRecordSchema.parse({
     ...row,

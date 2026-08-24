@@ -250,7 +250,10 @@ async function getApplication(
     )
     .limit(1);
   if (!application) {
-    throw new ApplicationInvariantError("NOT_FOUND", "Application was not found in this organization.");
+    throw new ApplicationInvariantError(
+      "NOT_FOUND",
+      "Application was not found in this organization.",
+    );
   }
   return application;
 }
@@ -278,10 +281,16 @@ async function getProtocol(
     )
     .limit(1);
   if (!protocol) {
-    throw new ApplicationInvariantError("NOT_FOUND", "Protocol version was not found in this organization.");
+    throw new ApplicationInvariantError(
+      "NOT_FOUND",
+      "Protocol version was not found in this organization.",
+    );
   }
   if (protocol.status !== "APPROVED") {
-    throw new ApplicationInvariantError("STALE_PROTOCOL", "Only an approved protocol version may mutate an application.");
+    throw new ApplicationInvariantError(
+      "STALE_PROTOCOL",
+      "Only an approved protocol version may mutate an application.",
+    );
   }
   return protocol;
 }
@@ -355,7 +364,11 @@ async function startAction(
     .from(s.actions)
     .where(eq(s.actions.idempotencyKey, key))
     .limit(1);
-  if (!raced) throw new ApplicationInvariantError("STALE_STATE", "The idempotent action could not be read after insertion.");
+  if (!raced)
+    throw new ApplicationInvariantError(
+      "STALE_STATE",
+      "The idempotent action could not be read after insertion.",
+    );
   return { action: raced, replayed: true };
 }
 
@@ -387,7 +400,10 @@ export async function recordWorkflowAction(
 ): Promise<MutationResult<ActionRow>> {
   assertContext(ctx);
   if (ctx.actor.origin !== "workflow") {
-    throw new ApplicationInvariantError("FORBIDDEN", "Only workflow actors may record workflow side effects.");
+    throw new ApplicationInvariantError(
+      "FORBIDDEN",
+      "Only workflow actors may record workflow side effects.",
+    );
   }
   assertPermission(ctx.actor, PERMISSIONS.COMMUNICATION_SEND_AUTOMATED);
   return withTenant(db, ctx.tenant, async (tx) => {
@@ -404,13 +420,25 @@ export async function recordWorkflowAction(
     }
     const outcome = input.outcome ?? { recorded: true };
     await completeAction(tx, started.action.id, outcome);
-    const [completed] = await tx.select().from(s.actions).where(eq(s.actions.id, started.action.id)).limit(1);
-    if (!completed) throw new ApplicationInvariantError("STALE_STATE", "Workflow action disappeared before completion.");
+    const [completed] = await tx
+      .select()
+      .from(s.actions)
+      .where(eq(s.actions.id, started.action.id))
+      .limit(1);
+    if (!completed)
+      throw new ApplicationInvariantError(
+        "STALE_STATE",
+        "Workflow action disappeared before completion.",
+      );
     await writeDomainEvent(tx, ctx.tenant, {
       eventType: "workflow.action.executed",
       aggregateType: "action",
       aggregateId: started.action.id,
-      payload: { actionType: input.actionType, targetRefs: input.targetRefs, idempotencyKey: started.action.idempotencyKey },
+      payload: {
+        actionType: input.actionType,
+        targetRefs: input.targetRefs,
+        idempotencyKey: started.action.idempotencyKey,
+      },
       actorType: "WORKFLOW",
       actorId: ctx.actor.userId,
       correlationId: ctx.correlationId,
@@ -450,7 +478,10 @@ async function approvedAction(
     )
     .limit(1);
   if (!approval || approval.status !== "APPROVED" || !approval.actionId) {
-    throw new ApplicationInvariantError("APPROVAL_REQUIRED", "An approved human authorization is required.");
+    throw new ApplicationInvariantError(
+      "APPROVAL_REQUIRED",
+      "An approved human authorization is required.",
+    );
   }
   const [action] = await tx
     .select()
@@ -463,10 +494,16 @@ async function approvedAction(
     )
     .limit(1);
   if (!action || action.actionType !== actionType) {
-    throw new ApplicationInvariantError("APPROVAL_REQUIRED", "The approval does not authorize this action.");
+    throw new ApplicationInvariantError(
+      "APPROVAL_REQUIRED",
+      "The approval does not authorize this action.",
+    );
   }
   if (!action.targetRefs.includes(`application:${applicationId}`)) {
-    throw new ApplicationInvariantError("APPROVAL_REQUIRED", "The approval target does not match the application.");
+    throw new ApplicationInvariantError(
+      "APPROVAL_REQUIRED",
+      "The approval target does not match the application.",
+    );
   }
   return action;
 }
@@ -542,7 +579,10 @@ async function persistReadiness(
       ),
     );
   const pendingApprovals = await tx
-    .select({ requiredPermission: s.approvals.requiredPermission, parameters: s.actions.parameters })
+    .select({
+      requiredPermission: s.approvals.requiredPermission,
+      parameters: s.actions.parameters,
+    })
     .from(s.approvals)
     .leftJoin(s.actions, eq(s.actions.id, s.approvals.actionId))
     .where(
@@ -554,7 +594,9 @@ async function persistReadiness(
 
   const visitedStages = new Set(stageEvents.map((event) => event.toStage));
   visitedStages.add(application.currentStage);
-  const requiredStages = protocol.stages.filter((stage) => stage.required).map((stage) => stage.name);
+  const requiredStages = protocol.stages
+    .filter((stage) => stage.required)
+    .map((stage) => stage.name);
   const incompleteStageNames = requiredStages.filter((stage) => !visitedStages.has(stage));
   let missingScorecardCount = 0;
   for (const interview of interviews) {
@@ -569,14 +611,19 @@ async function persistReadiness(
 
   const validEvidence = new Set(
     evidence
-      .filter((item) => item.protocolVersionId === protocol.id && item.observation.trim().length > 0)
+      .filter(
+        (item) => item.protocolVersionId === protocol.id && item.observation.trim().length > 0,
+      )
       .map((item) => item.competencyId),
   );
   for (const scorecard of scorecards) {
     if (scorecard.protocolVersionId !== protocol.id) continue;
     if (scorecard.status !== "SUBMITTED" && scorecard.status !== "AMENDED") continue;
     const rows = await tx
-      .select({ competencyId: s.scorecardRatings.competencyId, evidenceNote: s.scorecardRatings.evidenceNote })
+      .select({
+        competencyId: s.scorecardRatings.competencyId,
+        evidenceNote: s.scorecardRatings.evidenceNote,
+      })
       .from(s.scorecardRatings)
       .where(eq(s.scorecardRatings.scorecardId, scorecard.id));
     for (const row of rows) if (row.evidenceNote?.trim()) validEvidence.add(row.competencyId);
@@ -646,7 +693,7 @@ async function persistReadiness(
       missingApprovals: [...result.missingApprovals],
       staleProtocolFlags: [...result.staleProtocolFlags],
       rulesetVersion: protocol.decisionReadinessRulesetVersion,
-      computedByWorkflowRef: ctx.actor.origin === "workflow" ? ctx.actor.sessionId ?? null : null,
+      computedByWorkflowRef: ctx.actor.origin === "workflow" ? (ctx.actor.sessionId ?? null) : null,
     })
     .returning({ id: s.decisionReadinessSnapshots.id });
   const snapshotId = snapshot!.id;
@@ -698,21 +745,26 @@ export async function transitionApplication(
       .limit(1);
     if (replayAction?.status === "SUCCEEDED") {
       return {
-        value: replayAction.executionOutcome as { applicationId: string; status: string; currentStage: string },
+        value: replayAction.executionOutcome as {
+          applicationId: string;
+          status: string;
+          currentStage: string;
+        },
         actionId: replayAction.id,
         replayed: true,
       };
     }
     const fromStage = input.expectedFromStage ?? application.currentStage;
     if (fromStage !== application.currentStage) {
-      throw new ApplicationInvariantError("STALE_STATE", "The application changed before this transition was applied.");
+      throw new ApplicationInvariantError(
+        "STALE_STATE",
+        "The application changed before this transition was applied.",
+      );
     }
     const stageGraph: Record<string, readonly string[]> = {};
     for (const [index, stage] of protocol.stages.entries()) {
       const next = protocol.stages[index + 1]?.name;
-      stageGraph[stage.name] = next
-        ? [next, "REJECTED", "WITHDRAWN"]
-        : ["REJECTED", "WITHDRAWN"];
+      stageGraph[stage.name] = next ? [next, "REJECTED", "WITHDRAWN"] : ["REJECTED", "WITHDRAWN"];
     }
     assertStageTransition(stageGraph, fromStage, input.toStage);
     let action: ActionRow;
@@ -722,7 +774,11 @@ export async function transitionApplication(
       const started = await startAction(tx, ctx, {
         actionType,
         targetRefs: [`application:${application.id}`],
-        parameters: { fromStage, toStage: input.toStage, protocolVersionId: input.protocolVersionId },
+        parameters: {
+          fromStage,
+          toStage: input.toStage,
+          protocolVersionId: input.protocolVersionId,
+        },
         rationale: input.reason ?? `Human decision moved application to ${input.toStage}.`,
         idempotencyKey: input.idempotencyKey,
         status: "EXECUTING",
@@ -731,9 +787,15 @@ export async function transitionApplication(
       replayed = started.replayed;
     } else {
       assertPermission(ctx.actor, PERMISSIONS.APPLICATION_WRITE);
-      denyAgentMutation(ctx.actor, "Agents may propose stage transitions but may not execute them.");
+      denyAgentMutation(
+        ctx.actor,
+        "Agents may propose stage transitions but may not execute them.",
+      );
       if (!input.approvalId) {
-        throw new ApplicationInvariantError("APPROVAL_REQUIRED", "An approved authorization is required for an operational stage transition.");
+        throw new ApplicationInvariantError(
+          "APPROVAL_REQUIRED",
+          "An approved authorization is required for an operational stage transition.",
+        );
       }
       const approvalAction = await approvedAction(
         tx,
@@ -747,12 +809,19 @@ export async function transitionApplication(
         approvedParameters.toStage !== input.toStage ||
         approvedParameters.protocolVersionId !== input.protocolVersionId
       ) {
-        throw new ApplicationInvariantError("APPROVAL_REQUIRED", "The approval parameters do not match this transition.");
+        throw new ApplicationInvariantError(
+          "APPROVAL_REQUIRED",
+          "The approval parameters do not match this transition.",
+        );
       }
       const started = await startAction(tx, ctx, {
         actionType: "execute_stage_transition",
         targetRefs: [`application:${application.id}`],
-        parameters: { fromStage, toStage: input.toStage, protocolVersionId: input.protocolVersionId },
+        parameters: {
+          fromStage,
+          toStage: input.toStage,
+          protocolVersionId: input.protocolVersionId,
+        },
         rationale: input.reason ?? "Execute the approved operational stage transition.",
         idempotencyKey: input.idempotencyKey,
         status: "EXECUTING",
@@ -762,7 +831,11 @@ export async function transitionApplication(
     }
     if (replayed && action.status === "SUCCEEDED") {
       return {
-        value: action.executionOutcome as { applicationId: string; status: string; currentStage: string },
+        value: action.executionOutcome as {
+          applicationId: string;
+          status: string;
+          currentStage: string;
+        },
         actionId: action.id,
         replayed: true,
       };
@@ -795,7 +868,7 @@ export async function transitionApplication(
       reason: input.reason ?? null,
       actorType: actorType(ctx.actor),
       actorUserId: ctx.actor.origin === "human" ? ctx.actor.userId : null,
-      humanAuthorityRecordRef: terminal ? action.id : input.approvalId ?? null,
+      humanAuthorityRecordRef: terminal ? action.id : (input.approvalId ?? null),
       protocolVersionId: input.protocolVersionId,
       occurredAt: now,
     });
@@ -804,7 +877,12 @@ export async function transitionApplication(
       eventType: "application.stage_transitioned",
       aggregateType: "application",
       aggregateId: application.id,
-      payload: { fromStage, toStage: input.toStage, status, protocolVersionId: input.protocolVersionId },
+      payload: {
+        fromStage,
+        toStage: input.toStage,
+        status,
+        protocolVersionId: input.protocolVersionId,
+      },
       actorType: actorType(ctx.actor),
       actorId: ctx.actor.userId,
       correlationId: ctx.correlationId,
@@ -839,17 +917,42 @@ export async function openScorecard(
     const [scorecard] = await tx
       .select()
       .from(s.scorecards)
-      .where(and(eq(s.scorecards.id, input.scorecardId), eq(s.scorecards.organizationId, ctx.tenant.organizationId)))
+      .where(
+        and(
+          eq(s.scorecards.id, input.scorecardId),
+          eq(s.scorecards.organizationId, ctx.tenant.organizationId),
+        ),
+      )
       .limit(1);
-    if (!scorecard) throw new ApplicationInvariantError("NOT_FOUND", "Scorecard was not found in this organization.");
+    if (!scorecard)
+      throw new ApplicationInvariantError(
+        "NOT_FOUND",
+        "Scorecard was not found in this organization.",
+      );
     const application = await getApplication(tx, ctx, scorecard.applicationId);
     await getProtocol(tx, ctx, application, input.protocolVersionId);
-    if (scorecard.protocolVersionId !== input.protocolVersionId) throw new ApplicationInvariantError("STALE_PROTOCOL", "Scorecard protocol version is stale.");
-    if (scorecard.raterUserId !== ctx.actor.userId) throw new ApplicationInvariantError("FORBIDDEN", "Only the assigned rater may open this scorecard.");
+    if (scorecard.protocolVersionId !== input.protocolVersionId)
+      throw new ApplicationInvariantError("STALE_PROTOCOL", "Scorecard protocol version is stale.");
+    if (scorecard.raterUserId !== ctx.actor.userId)
+      throw new ApplicationInvariantError(
+        "FORBIDDEN",
+        "Only the assigned rater may open this scorecard.",
+      );
     assertPermission(ctx.actor, PERMISSIONS.SCORECARD_SUBMIT);
-    denyAgentMutation(ctx.actor, "Agents may prepare scorecard work but may not open or mutate scorecards.");
-    if (scorecard.status === "OPEN") return { value: { scorecardId: scorecard.id, status: scorecard.status }, actionId: "", replayed: true };
-    assertScorecardTransition(scorecard.status as "NOT_OPEN" | "OPEN" | "SUBMITTED" | "AMENDED", "OPEN");
+    denyAgentMutation(
+      ctx.actor,
+      "Agents may prepare scorecard work but may not open or mutate scorecards.",
+    );
+    if (scorecard.status === "OPEN")
+      return {
+        value: { scorecardId: scorecard.id, status: scorecard.status },
+        actionId: "",
+        replayed: true,
+      };
+    assertScorecardTransition(
+      scorecard.status as "NOT_OPEN" | "OPEN" | "SUBMITTED" | "AMENDED",
+      "OPEN",
+    );
     const started = await startAction(tx, ctx, {
       actionType: "open_scorecard",
       targetRefs: [`scorecard:${scorecard.id}`],
@@ -859,10 +962,17 @@ export async function openScorecard(
       status: "EXECUTING",
     });
     if (started.replayed && started.action.status === "SUCCEEDED") {
-      return { value: started.action.executionOutcome as { scorecardId: string; status: string }, actionId: started.action.id, replayed: true };
+      return {
+        value: started.action.executionOutcome as { scorecardId: string; status: string },
+        actionId: started.action.id,
+        replayed: true,
+      };
     }
     const now = new Date();
-    await tx.update(s.scorecards).set({ status: "OPEN", openedAt: now, updatedAt: now }).where(eq(s.scorecards.id, scorecard.id));
+    await tx
+      .update(s.scorecards)
+      .set({ status: "OPEN", openedAt: now, updatedAt: now })
+      .where(eq(s.scorecards.id, scorecard.id));
     const value = { scorecardId: scorecard.id, status: "OPEN" };
     await writeDomainEvent(tx, ctx.tenant, {
       eventType: "scorecard.opened",
@@ -902,17 +1012,37 @@ export async function submitScorecard(
     const [scorecard] = await tx
       .select()
       .from(s.scorecards)
-      .where(and(eq(s.scorecards.id, input.scorecardId), eq(s.scorecards.organizationId, ctx.tenant.organizationId)))
+      .where(
+        and(
+          eq(s.scorecards.id, input.scorecardId),
+          eq(s.scorecards.organizationId, ctx.tenant.organizationId),
+        ),
+      )
       .limit(1);
-    if (!scorecard) throw new ApplicationInvariantError("NOT_FOUND", "Scorecard was not found in this organization.");
+    if (!scorecard)
+      throw new ApplicationInvariantError(
+        "NOT_FOUND",
+        "Scorecard was not found in this organization.",
+      );
     const application = await getApplication(tx, ctx, scorecard.applicationId);
     const protocol = await getProtocol(tx, ctx, application, input.protocolVersionId);
-    if (scorecard.protocolVersionId !== input.protocolVersionId) throw new ApplicationInvariantError("STALE_PROTOCOL", "Scorecard protocol version is stale.");
-    if (scorecard.raterUserId !== ctx.actor.userId) throw new ApplicationInvariantError("FORBIDDEN", "Only the assigned rater may submit this scorecard.");
+    if (scorecard.protocolVersionId !== input.protocolVersionId)
+      throw new ApplicationInvariantError("STALE_PROTOCOL", "Scorecard protocol version is stale.");
+    if (scorecard.raterUserId !== ctx.actor.userId)
+      throw new ApplicationInvariantError(
+        "FORBIDDEN",
+        "Only the assigned rater may submit this scorecard.",
+      );
     assertPermission(ctx.actor, PERMISSIONS.SCORECARD_SUBMIT);
-    denyAgentMutation(ctx.actor, "Agents may propose scorecard follow-up but may not submit evidence.");
+    denyAgentMutation(
+      ctx.actor,
+      "Agents may propose scorecard follow-up but may not submit evidence.",
+    );
     const targetStatus = input.amend ? "AMENDED" : "SUBMITTED";
-    assertScorecardTransition(scorecard.status as "NOT_OPEN" | "OPEN" | "SUBMITTED" | "AMENDED", targetStatus);
+    assertScorecardTransition(
+      scorecard.status as "NOT_OPEN" | "OPEN" | "SUBMITTED" | "AMENDED",
+      targetStatus,
+    );
     const required = await tx
       .select()
       .from(s.protocolCompetencies)
@@ -924,21 +1054,46 @@ export async function submitScorecard(
         ),
       );
     const supplied = new Map(input.ratings.map((rating) => [rating.competencyId, rating]));
-    if (supplied.size !== input.ratings.length) throw new ApplicationInvariantError("VALIDATION_ERROR", "A scorecard cannot contain duplicate competency ratings.");
+    if (supplied.size !== input.ratings.length)
+      throw new ApplicationInvariantError(
+        "VALIDATION_ERROR",
+        "A scorecard cannot contain duplicate competency ratings.",
+      );
     const missing = required.filter((competency) => !supplied.has(competency.competencyId));
-    if (missing.length > 0) throw new ApplicationInvariantError("VALIDATION_ERROR", `Missing required competency ratings: ${missing.map((item) => item.competencyId).join(", ")}.`);
+    if (missing.length > 0)
+      throw new ApplicationInvariantError(
+        "VALIDATION_ERROR",
+        `Missing required competency ratings: ${missing.map((item) => item.competencyId).join(", ")}.`,
+      );
     const allowed = new Set(required.map((item) => item.competencyId));
-    if (input.ratings.some((rating) => !allowed.has(rating.competencyId))) throw new ApplicationInvariantError("VALIDATION_ERROR", "Scorecard contains a competency outside the active protocol.");
+    if (input.ratings.some((rating) => !allowed.has(rating.competencyId)))
+      throw new ApplicationInvariantError(
+        "VALIDATION_ERROR",
+        "Scorecard contains a competency outside the active protocol.",
+      );
     const started = await startAction(tx, ctx, {
       actionType: "submit_scorecard",
       targetRefs: [`scorecard:${scorecard.id}`],
-      parameters: { scorecardId: scorecard.id, protocolVersionId: input.protocolVersionId, ratings: input.ratings },
-      rationale: input.amend ? "Amend a submitted scorecard with evidence." : "Submit a complete scorecard with evidence.",
+      parameters: {
+        scorecardId: scorecard.id,
+        protocolVersionId: input.protocolVersionId,
+        ratings: input.ratings,
+      },
+      rationale: input.amend
+        ? "Amend a submitted scorecard with evidence."
+        : "Submit a complete scorecard with evidence.",
       idempotencyKey: input.idempotencyKey,
       status: "EXECUTING",
     });
     if (started.replayed && started.action.status === "SUCCEEDED") {
-      return { value: started.action.executionOutcome as ReadinessSnapshotResult & { scorecardId: string; status: string }, actionId: started.action.id, replayed: true };
+      return {
+        value: started.action.executionOutcome as ReadinessSnapshotResult & {
+          scorecardId: string;
+          status: string;
+        },
+        actionId: started.action.id,
+        replayed: true,
+      };
     }
     if (input.amend) {
       await tx.delete(s.scorecardRatings).where(eq(s.scorecardRatings.scorecardId, scorecard.id));
@@ -969,14 +1124,21 @@ export async function submitScorecard(
       })),
     );
     const now = new Date();
-    await tx.update(s.scorecards).set({ status: targetStatus, submittedAt: now, updatedAt: now }).where(eq(s.scorecards.id, scorecard.id));
+    await tx
+      .update(s.scorecards)
+      .set({ status: targetStatus, submittedAt: now, updatedAt: now })
+      .where(eq(s.scorecards.id, scorecard.id));
     const readiness = await persistReadiness(tx, ctx, application, protocol);
     const value = { scorecardId: scorecard.id, status: targetStatus, ...readiness };
     await writeDomainEvent(tx, ctx.tenant, {
       eventType: "scorecard.submitted",
       aggregateType: "scorecard",
       aggregateId: scorecard.id,
-      payload: { protocolVersionId: protocol.id, status: targetStatus, readiness: readiness.result.status },
+      payload: {
+        protocolVersionId: protocol.id,
+        status: targetStatus,
+        readiness: readiness.result.status,
+      },
       actorType: actorType(ctx.actor),
       actorId: ctx.actor.userId,
       correlationId: ctx.correlationId,
@@ -989,7 +1151,9 @@ export async function submitScorecard(
       targetId: scorecard.id,
       authorityClass: "A1",
       policyVersion: protocol.decisionReadinessRulesetVersion,
-      evidenceRefs: input.ratings.map((rating) => `scorecard:${scorecard.id}:competency:${rating.competencyId}`),
+      evidenceRefs: input.ratings.map(
+        (rating) => `scorecard:${scorecard.id}:competency:${rating.competencyId}`,
+      ),
       beforeState: { status: scorecard.status },
       afterState: { status: targetStatus, readiness: readiness.result.status },
       outcome: "SUCCEEDED",
@@ -1021,7 +1185,10 @@ export async function createException(
 ): Promise<MutationResult<ExceptionRow>> {
   assertContext(ctx);
   const input = createExceptionInputSchema.parse(rawInput);
-  denyAgentMutation(ctx.actor, "Agents may report exceptions through bounded tools but may not mutate exception state directly.");
+  denyAgentMutation(
+    ctx.actor,
+    "Agents may report exceptions through bounded tools but may not mutate exception state directly.",
+  );
   return withTenant(db, ctx.tenant, async (tx) => {
     const deduplicationKey = buildExceptionKey({
       organizationId: ctx.tenant.organizationId,
@@ -1032,14 +1199,22 @@ export async function createException(
     });
     const started = await startAction(tx, ctx, {
       actionType: "create_exception",
-      targetRefs: [input.applicationId ? `application:${input.applicationId}` : `organization:${ctx.tenant.organizationId}`],
+      targetRefs: [
+        input.applicationId
+          ? `application:${input.applicationId}`
+          : `organization:${ctx.tenant.organizationId}`,
+      ],
       parameters: { deduplicationKey, type: input.type },
       rationale: input.detail,
       idempotencyKey: input.idempotencyKey,
       status: "EXECUTING",
     });
     if (started.replayed && started.action.status === "SUCCEEDED") {
-      return { value: started.action.executionOutcome as ExceptionRow, actionId: started.action.id, replayed: true };
+      return {
+        value: started.action.executionOutcome as ExceptionRow,
+        actionId: started.action.id,
+        replayed: true,
+      };
     }
     const [inserted] = await tx
       .insert(s.exceptions)
@@ -1063,19 +1238,43 @@ export async function createException(
       const [existing] = await tx
         .select()
         .from(s.exceptions)
-        .where(and(eq(s.exceptions.organizationId, ctx.tenant.organizationId), eq(s.exceptions.deduplicationKey, deduplicationKey)))
+        .where(
+          and(
+            eq(s.exceptions.organizationId, ctx.tenant.organizationId),
+            eq(s.exceptions.deduplicationKey, deduplicationKey),
+          ),
+        )
         .limit(1);
-      if (!existing) throw new ApplicationInvariantError("STALE_STATE", "Exception deduplication read failed.");
-      const reopened = existing.status === "RESOLVED" || existing.status === "DISMISSED_WITH_REASON";
+      if (!existing)
+        throw new ApplicationInvariantError("STALE_STATE", "Exception deduplication read failed.");
+      const reopened =
+        existing.status === "RESOLVED" || existing.status === "DISMISSED_WITH_REASON";
       if (reopened) {
         const [updated] = await tx
           .update(s.exceptions)
-          .set({ status: "OPEN", title: input.title, detail: input.detail, deadlineAt: input.deadlineAt, resolvedAt: null, resolutionReason: null, lastRecomputedAt: new Date() })
+          .set({
+            status: "OPEN",
+            title: input.title,
+            detail: input.detail,
+            deadlineAt: input.deadlineAt,
+            resolvedAt: null,
+            resolutionReason: null,
+            lastRecomputedAt: new Date(),
+          })
           .where(eq(s.exceptions.id, existing.id))
           .returning();
         exception = updated;
       } else {
-        const [updated] = await tx.update(s.exceptions).set({ title: input.title, detail: input.detail, deadlineAt: input.deadlineAt, lastRecomputedAt: new Date() }).where(eq(s.exceptions.id, existing.id)).returning();
+        const [updated] = await tx
+          .update(s.exceptions)
+          .set({
+            title: input.title,
+            detail: input.detail,
+            deadlineAt: input.deadlineAt,
+            lastRecomputedAt: new Date(),
+          })
+          .where(eq(s.exceptions.id, existing.id))
+          .returning();
         exception = updated;
       }
     }
@@ -1114,10 +1313,26 @@ export async function resolveException(
   assertContext(ctx);
   const input = resolveExceptionInputSchema.parse(rawInput);
   assertPermission(ctx.actor, PERMISSIONS.EXCEPTION_RESOLVE);
-  denyAgentMutation(ctx.actor, "Agents may recommend exception resolution but may not resolve exceptions directly.");
+  denyAgentMutation(
+    ctx.actor,
+    "Agents may recommend exception resolution but may not resolve exceptions directly.",
+  );
   return withTenant(db, ctx.tenant, async (tx) => {
-    const [exception] = await tx.select().from(s.exceptions).where(and(eq(s.exceptions.id, input.exceptionId), eq(s.exceptions.organizationId, ctx.tenant.organizationId))).limit(1);
-    if (!exception) throw new ApplicationInvariantError("NOT_FOUND", "Exception was not found in this organization.");
+    const [exception] = await tx
+      .select()
+      .from(s.exceptions)
+      .where(
+        and(
+          eq(s.exceptions.id, input.exceptionId),
+          eq(s.exceptions.organizationId, ctx.tenant.organizationId),
+        ),
+      )
+      .limit(1);
+    if (!exception)
+      throw new ApplicationInvariantError(
+        "NOT_FOUND",
+        "Exception was not found in this organization.",
+      );
     const started = await startAction(tx, ctx, {
       actionType: "resolve_exception",
       targetRefs: [`exception:${exception.id}`],
@@ -1126,11 +1341,46 @@ export async function resolveException(
       idempotencyKey: input.idempotencyKey,
       status: "EXECUTING",
     });
-    if (started.replayed && started.action.status === "SUCCEEDED") return { value: started.action.executionOutcome as ExceptionRow, actionId: started.action.id, replayed: true };
-    const [updated] = await tx.update(s.exceptions).set({ status: "RESOLVED", resolvedAt: new Date(), resolutionReason: input.reason, lastRecomputedAt: new Date() }).where(eq(s.exceptions.id, exception.id)).returning();
-    if (!updated) throw new ApplicationInvariantError("STALE_STATE", "Exception resolution failed.");
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "exception.resolved", aggregateType: "exception", aggregateId: exception.id, payload: { reason: input.reason }, actorType: actorType(ctx.actor), actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: actorType(ctx.actor), actorId: ctx.actor.userId, actionType: "resolve_exception", targetType: "exception", targetId: exception.id, authorityClass: "A2", policyVersion: POLICY_VERSION, beforeState: { status: exception.status }, afterState: { status: "RESOLVED", reason: input.reason }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    if (started.replayed && started.action.status === "SUCCEEDED")
+      return {
+        value: started.action.executionOutcome as ExceptionRow,
+        actionId: started.action.id,
+        replayed: true,
+      };
+    const [updated] = await tx
+      .update(s.exceptions)
+      .set({
+        status: "RESOLVED",
+        resolvedAt: new Date(),
+        resolutionReason: input.reason,
+        lastRecomputedAt: new Date(),
+      })
+      .where(eq(s.exceptions.id, exception.id))
+      .returning();
+    if (!updated)
+      throw new ApplicationInvariantError("STALE_STATE", "Exception resolution failed.");
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "exception.resolved",
+      aggregateType: "exception",
+      aggregateId: exception.id,
+      payload: { reason: input.reason },
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      actionType: "resolve_exception",
+      targetType: "exception",
+      targetId: exception.id,
+      authorityClass: "A2",
+      policyVersion: POLICY_VERSION,
+      beforeState: { status: exception.status },
+      afterState: { status: "RESOLVED", reason: input.reason },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     await completeAction(tx, started.action.id, updated as unknown as Record<string, unknown>);
     return { value: updated, actionId: started.action.id, replayed: false };
   });
@@ -1143,30 +1393,91 @@ export async function createObligation(
 ): Promise<MutationResult<ObligationRow>> {
   assertContext(ctx);
   const input = createObligationInputSchema.parse(rawInput);
-  denyAgentMutation(ctx.actor, "Agents may propose obligations but may not create durable obligations directly.");
+  denyAgentMutation(
+    ctx.actor,
+    "Agents may propose obligations but may not create durable obligations directly.",
+  );
   return withTenant(db, ctx.tenant, async (tx) => {
     const started = await startAction(tx, ctx, {
       actionType: "create_obligation",
-      targetRefs: [input.applicationId ? `application:${input.applicationId}` : `organization:${ctx.tenant.organizationId}`],
-      parameters: { applicationId: input.applicationId, interviewId: input.interviewId, obligationType: input.obligationType, workflowRef: input.workflowRef },
+      targetRefs: [
+        input.applicationId
+          ? `application:${input.applicationId}`
+          : `organization:${ctx.tenant.organizationId}`,
+      ],
+      parameters: {
+        applicationId: input.applicationId,
+        interviewId: input.interviewId,
+        obligationType: input.obligationType,
+        workflowRef: input.workflowRef,
+      },
       rationale: `Create ${input.obligationType} obligation.`,
       idempotencyKey: input.idempotencyKey,
       status: "EXECUTING",
     });
-    if (started.replayed && started.action.status === "SUCCEEDED") return { value: started.action.executionOutcome as ObligationRow, actionId: started.action.id, replayed: true };
+    if (started.replayed && started.action.status === "SUCCEEDED")
+      return {
+        value: started.action.executionOutcome as ObligationRow,
+        actionId: started.action.id,
+        replayed: true,
+      };
     const where = [
       eq(s.applicationObligations.organizationId, ctx.tenant.organizationId),
       eq(s.applicationObligations.obligationType, input.obligationType),
       inArray(s.applicationObligations.state, ["PENDING", "ESCALATED"]),
     ];
-    if (input.applicationId) where.push(eq(s.applicationObligations.applicationId, input.applicationId)); else where.push(isNull(s.applicationObligations.applicationId));
-    if (input.interviewId) where.push(eq(s.applicationObligations.interviewId, input.interviewId)); else where.push(isNull(s.applicationObligations.interviewId));
-    if (input.responsibleUserId) where.push(eq(s.applicationObligations.responsibleUserId, input.responsibleUserId)); else where.push(isNull(s.applicationObligations.responsibleUserId));
-    const [existing] = await tx.select().from(s.applicationObligations).where(and(...where)).limit(1);
-    const obligation = existing ?? (await tx.insert(s.applicationObligations).values({ organizationId: ctx.tenant.organizationId, applicationId: input.applicationId, interviewId: input.interviewId, obligationType: input.obligationType, responsibleUserId: input.responsibleUserId, dueAt: input.dueAt, state: "PENDING", workflowRef: input.workflowRef }).returning())[0];
+    if (input.applicationId)
+      where.push(eq(s.applicationObligations.applicationId, input.applicationId));
+    else where.push(isNull(s.applicationObligations.applicationId));
+    if (input.interviewId) where.push(eq(s.applicationObligations.interviewId, input.interviewId));
+    else where.push(isNull(s.applicationObligations.interviewId));
+    if (input.responsibleUserId)
+      where.push(eq(s.applicationObligations.responsibleUserId, input.responsibleUserId));
+    else where.push(isNull(s.applicationObligations.responsibleUserId));
+    const [existing] = await tx
+      .select()
+      .from(s.applicationObligations)
+      .where(and(...where))
+      .limit(1);
+    const obligation =
+      existing ??
+      (
+        await tx
+          .insert(s.applicationObligations)
+          .values({
+            organizationId: ctx.tenant.organizationId,
+            applicationId: input.applicationId,
+            interviewId: input.interviewId,
+            obligationType: input.obligationType,
+            responsibleUserId: input.responsibleUserId,
+            dueAt: input.dueAt,
+            state: "PENDING",
+            workflowRef: input.workflowRef,
+          })
+          .returning()
+      )[0];
     if (!obligation) throw new ApplicationInvariantError("STALE_STATE", "Obligation write failed.");
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "obligation.created", aggregateType: "obligation", aggregateId: obligation.id, payload: { obligationType: obligation.obligationType, state: obligation.state }, actorType: actorType(ctx.actor), actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: actorType(ctx.actor), actorId: ctx.actor.userId, actionType: "create_obligation", targetType: "obligation", targetId: obligation.id, authorityClass: "A1", policyVersion: POLICY_VERSION, afterState: { state: obligation.state, dueAt: obligation.dueAt.toISOString() }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "obligation.created",
+      aggregateType: "obligation",
+      aggregateId: obligation.id,
+      payload: { obligationType: obligation.obligationType, state: obligation.state },
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      actionType: "create_obligation",
+      targetType: "obligation",
+      targetId: obligation.id,
+      authorityClass: "A1",
+      policyVersion: POLICY_VERSION,
+      afterState: { state: obligation.state, dueAt: obligation.dueAt.toISOString() },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     await completeAction(tx, started.action.id, obligation as unknown as Record<string, unknown>);
     return { value: obligation, actionId: started.action.id, replayed: false };
   });
@@ -1179,16 +1490,69 @@ export async function resolveObligation(
 ): Promise<MutationResult<ObligationRow>> {
   assertContext(ctx);
   const input = resolveObligationInputSchema.parse(rawInput);
-  denyAgentMutation(ctx.actor, "Agents may recommend obligation resolution but may not resolve obligations directly.");
+  denyAgentMutation(
+    ctx.actor,
+    "Agents may recommend obligation resolution but may not resolve obligations directly.",
+  );
   return withTenant(db, ctx.tenant, async (tx) => {
-    const [obligation] = await tx.select().from(s.applicationObligations).where(and(eq(s.applicationObligations.id, input.obligationId), eq(s.applicationObligations.organizationId, ctx.tenant.organizationId))).limit(1);
-    if (!obligation) throw new ApplicationInvariantError("NOT_FOUND", "Obligation was not found in this organization.");
-    const started = await startAction(tx, ctx, { actionType: "resolve_obligation", targetRefs: [`obligation:${obligation.id}`], parameters: { obligationId: obligation.id }, rationale: "Satisfy the explicit obligation.", idempotencyKey: input.idempotencyKey, status: "EXECUTING" });
-    if (started.replayed && started.action.status === "SUCCEEDED") return { value: started.action.executionOutcome as ObligationRow, actionId: started.action.id, replayed: true };
-    const [updated] = await tx.update(s.applicationObligations).set({ state: "SATISFIED", satisfiedAt: new Date(), updatedAt: new Date() }).where(eq(s.applicationObligations.id, obligation.id)).returning();
-    if (!updated) throw new ApplicationInvariantError("STALE_STATE", "Obligation resolution failed.");
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "obligation.resolved", aggregateType: "obligation", aggregateId: obligation.id, payload: { state: "SATISFIED" }, actorType: actorType(ctx.actor), actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: actorType(ctx.actor), actorId: ctx.actor.userId, actionType: "resolve_obligation", targetType: "obligation", targetId: obligation.id, authorityClass: "A1", policyVersion: POLICY_VERSION, beforeState: { state: obligation.state }, afterState: { state: "SATISFIED" }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    const [obligation] = await tx
+      .select()
+      .from(s.applicationObligations)
+      .where(
+        and(
+          eq(s.applicationObligations.id, input.obligationId),
+          eq(s.applicationObligations.organizationId, ctx.tenant.organizationId),
+        ),
+      )
+      .limit(1);
+    if (!obligation)
+      throw new ApplicationInvariantError(
+        "NOT_FOUND",
+        "Obligation was not found in this organization.",
+      );
+    const started = await startAction(tx, ctx, {
+      actionType: "resolve_obligation",
+      targetRefs: [`obligation:${obligation.id}`],
+      parameters: { obligationId: obligation.id },
+      rationale: "Satisfy the explicit obligation.",
+      idempotencyKey: input.idempotencyKey,
+      status: "EXECUTING",
+    });
+    if (started.replayed && started.action.status === "SUCCEEDED")
+      return {
+        value: started.action.executionOutcome as ObligationRow,
+        actionId: started.action.id,
+        replayed: true,
+      };
+    const [updated] = await tx
+      .update(s.applicationObligations)
+      .set({ state: "SATISFIED", satisfiedAt: new Date(), updatedAt: new Date() })
+      .where(eq(s.applicationObligations.id, obligation.id))
+      .returning();
+    if (!updated)
+      throw new ApplicationInvariantError("STALE_STATE", "Obligation resolution failed.");
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "obligation.resolved",
+      aggregateType: "obligation",
+      aggregateId: obligation.id,
+      payload: { state: "SATISFIED" },
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      actionType: "resolve_obligation",
+      targetType: "obligation",
+      targetId: obligation.id,
+      authorityClass: "A1",
+      policyVersion: POLICY_VERSION,
+      beforeState: { state: obligation.state },
+      afterState: { state: "SATISFIED" },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     await completeAction(tx, started.action.id, updated as unknown as Record<string, unknown>);
     return { value: updated, actionId: started.action.id, replayed: false };
   });
@@ -1203,16 +1567,84 @@ export async function requestApproval(
   const input = requestApprovalInputSchema.parse(rawInput);
   assertPermission(ctx.actor, PERMISSIONS.APPROVAL_REQUEST);
   const authority = authorityFor(input.actionType);
-  if (authority !== "A2") throw new ApplicationInvariantError("VALIDATION_ERROR", "Only A2 actions use the approval workflow.");
+  if (authority !== "A2")
+    throw new ApplicationInvariantError(
+      "VALIDATION_ERROR",
+      "Only A2 actions use the approval workflow.",
+    );
   return withTenant(db, ctx.tenant, async (tx) => {
-    const started = await startAction(tx, ctx, { actionType: input.actionType, targetRefs: input.targetRefs, parameters: input.parameters, rationale: input.rationale, evidenceRefs: input.evidenceRefs, idempotencyKey: input.idempotencyKey, expiresAt: input.expiresAt, status: "AWAITING_APPROVAL" });
-    const [existingApproval] = await tx.select().from(s.approvals).where(and(eq(s.approvals.actionId, started.action.id), eq(s.approvals.organizationId, ctx.tenant.organizationId))).limit(1);
-    const approval = existingApproval ?? (await tx.insert(s.approvals).values({ organizationId: ctx.tenant.organizationId, actionId: started.action.id, requiredPermission: input.requiredPermission, requestedByUserId: ctx.actor.origin === "human" ? ctx.actor.userId : null, status: "PENDING", policyVersion: POLICY_VERSION, evidenceRefs: input.evidenceRefs, reason: input.rationale, expiresAt: input.expiresAt }).returning())[0];
+    const started = await startAction(tx, ctx, {
+      actionType: input.actionType,
+      targetRefs: input.targetRefs,
+      parameters: input.parameters,
+      rationale: input.rationale,
+      evidenceRefs: input.evidenceRefs,
+      idempotencyKey: input.idempotencyKey,
+      expiresAt: input.expiresAt,
+      status: "AWAITING_APPROVAL",
+    });
+    const [existingApproval] = await tx
+      .select()
+      .from(s.approvals)
+      .where(
+        and(
+          eq(s.approvals.actionId, started.action.id),
+          eq(s.approvals.organizationId, ctx.tenant.organizationId),
+        ),
+      )
+      .limit(1);
+    const approval =
+      existingApproval ??
+      (
+        await tx
+          .insert(s.approvals)
+          .values({
+            organizationId: ctx.tenant.organizationId,
+            actionId: started.action.id,
+            requiredPermission: input.requiredPermission,
+            requestedByUserId: ctx.actor.origin === "human" ? ctx.actor.userId : null,
+            status: "PENDING",
+            policyVersion: POLICY_VERSION,
+            evidenceRefs: input.evidenceRefs,
+            reason: input.rationale,
+            expiresAt: input.expiresAt,
+          })
+          .returning()
+      )[0];
     if (!approval) throw new ApplicationInvariantError("STALE_STATE", "Approval write failed.");
-    if (started.replayed) return { value: { action: started.action, approval }, actionId: started.action.id, replayed: true };
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "approval.requested", aggregateType: "action", aggregateId: started.action.id, payload: { approvalId: approval.id, actionType: input.actionType }, actorType: actorType(ctx.actor), actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: actorType(ctx.actor), actorId: ctx.actor.userId, actionType: "approval_requested", targetType: "approval", targetId: approval.id, authorityClass: "A2", policyVersion: POLICY_VERSION, evidenceRefs: input.evidenceRefs, afterState: { status: "PENDING", actionId: started.action.id }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
-    return { value: { action: started.action, approval }, actionId: started.action.id, replayed: false };
+    if (started.replayed)
+      return {
+        value: { action: started.action, approval },
+        actionId: started.action.id,
+        replayed: true,
+      };
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "approval.requested",
+      aggregateType: "action",
+      aggregateId: started.action.id,
+      payload: { approvalId: approval.id, actionType: input.actionType },
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      actionType: "approval_requested",
+      targetType: "approval",
+      targetId: approval.id,
+      authorityClass: "A2",
+      policyVersion: POLICY_VERSION,
+      evidenceRefs: input.evidenceRefs,
+      afterState: { status: "PENDING", actionId: started.action.id },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
+    return {
+      value: { action: started.action, approval },
+      actionId: started.action.id,
+      replayed: false,
+    };
   });
 }
 
@@ -1225,20 +1657,91 @@ export async function decideApproval(
   const input = decideApprovalInputSchema.parse(rawInput);
   assertHumanAuthority(ctx.actor, PERMISSIONS.APPROVAL_DECIDE);
   return withTenant(db, ctx.tenant, async (tx) => {
-    const [approval] = await tx.select().from(s.approvals).where(and(eq(s.approvals.id, input.approvalId), eq(s.approvals.organizationId, ctx.tenant.organizationId))).limit(1);
-    if (!approval) throw new ApplicationInvariantError("NOT_FOUND", "Approval was not found in this organization.");
-    const [action] = approval.actionId ? await tx.select().from(s.actions).where(and(eq(s.actions.id, approval.actionId), eq(s.actions.organizationId, ctx.tenant.organizationId))).limit(1) : [];
+    const [approval] = await tx
+      .select()
+      .from(s.approvals)
+      .where(
+        and(
+          eq(s.approvals.id, input.approvalId),
+          eq(s.approvals.organizationId, ctx.tenant.organizationId),
+        ),
+      )
+      .limit(1);
+    if (!approval)
+      throw new ApplicationInvariantError(
+        "NOT_FOUND",
+        "Approval was not found in this organization.",
+      );
+    const [action] = approval.actionId
+      ? await tx
+          .select()
+          .from(s.actions)
+          .where(
+            and(
+              eq(s.actions.id, approval.actionId),
+              eq(s.actions.organizationId, ctx.tenant.organizationId),
+            ),
+          )
+          .limit(1)
+      : [];
     if (!action) throw new ApplicationInvariantError("NOT_FOUND", "Approval action was not found.");
-    const started = await startAction(tx, ctx, { actionType: "request_approval", targetRefs: [`approval:${approval.id}`], parameters: { approvalId: approval.id, decision: input.decision }, rationale: input.reason, idempotencyKey: input.idempotencyKey, status: "EXECUTING" });
-    if (started.replayed && started.action.status === "SUCCEEDED") return { value: started.action.executionOutcome as { approval: ApprovalRow; action: ActionRow }, actionId: started.action.id, replayed: true };
+    const started = await startAction(tx, ctx, {
+      actionType: "request_approval",
+      targetRefs: [`approval:${approval.id}`],
+      parameters: { approvalId: approval.id, decision: input.decision },
+      rationale: input.reason,
+      idempotencyKey: input.idempotencyKey,
+      status: "EXECUTING",
+    });
+    if (started.replayed && started.action.status === "SUCCEEDED")
+      return {
+        value: started.action.executionOutcome as { approval: ApprovalRow; action: ActionRow },
+        actionId: started.action.id,
+        replayed: true,
+      };
     const now = new Date();
-    const [updatedApproval] = await tx.update(s.approvals).set({ status: input.decision, decidedByUserId: ctx.actor.userId, decidedAt: now, reason: input.reason }).where(and(eq(s.approvals.id, approval.id), eq(s.approvals.status, "PENDING"))).returning();
-    if (!updatedApproval) throw new ApplicationInvariantError("STALE_STATE", "Approval was decided concurrently.");
-    const [updatedAction] = await tx.update(s.actions).set({ status: input.decision === "APPROVED" ? "APPROVED" : "REJECTED", updatedAt: now }).where(eq(s.actions.id, action.id)).returning();
-    if (!updatedAction) throw new ApplicationInvariantError("STALE_STATE", "Approval action update failed.");
+    const [updatedApproval] = await tx
+      .update(s.approvals)
+      .set({
+        status: input.decision,
+        decidedByUserId: ctx.actor.userId,
+        decidedAt: now,
+        reason: input.reason,
+      })
+      .where(and(eq(s.approvals.id, approval.id), eq(s.approvals.status, "PENDING")))
+      .returning();
+    if (!updatedApproval)
+      throw new ApplicationInvariantError("STALE_STATE", "Approval was decided concurrently.");
+    const [updatedAction] = await tx
+      .update(s.actions)
+      .set({ status: input.decision === "APPROVED" ? "APPROVED" : "REJECTED", updatedAt: now })
+      .where(eq(s.actions.id, action.id))
+      .returning();
+    if (!updatedAction)
+      throw new ApplicationInvariantError("STALE_STATE", "Approval action update failed.");
     const value = { approval: updatedApproval, action: updatedAction };
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "approval.decided", aggregateType: "approval", aggregateId: approval.id, payload: { decision: input.decision, actionId: action.id }, actorType: "HUMAN", actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: "HUMAN", actorId: ctx.actor.userId, actionType: "approval_decided", targetType: "approval", targetId: approval.id, authorityClass: "A3", policyVersion: POLICY_VERSION, beforeState: { status: approval.status }, afterState: { status: input.decision }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "approval.decided",
+      aggregateType: "approval",
+      aggregateId: approval.id,
+      payload: { decision: input.decision, actionId: action.id },
+      actorType: "HUMAN",
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: "HUMAN",
+      actorId: ctx.actor.userId,
+      actionType: "approval_decided",
+      targetType: "approval",
+      targetId: approval.id,
+      authorityClass: "A3",
+      policyVersion: POLICY_VERSION,
+      beforeState: { status: approval.status },
+      afterState: { status: input.decision },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     await completeAction(tx, started.action.id, value as unknown as Record<string, unknown>);
     return { value, actionId: started.action.id, replayed: false };
   });
@@ -1252,15 +1755,60 @@ export async function proposeAction(
   assertContext(ctx);
   const input = proposeActionInputSchema.parse(rawInput);
   const authority = authorityFor(input.actionType);
-  if (input.requestedAuthorityClass && input.requestedAuthorityClass !== authority) throw new ApplicationInvariantError("FORBIDDEN", "The requested authority class does not match deterministic policy.");
+  if (input.requestedAuthorityClass && input.requestedAuthorityClass !== authority)
+    throw new ApplicationInvariantError(
+      "FORBIDDEN",
+      "The requested authority class does not match deterministic policy.",
+    );
   return withTenant(db, ctx.tenant, async (tx) => {
-    const started = await startAction(tx, ctx, { actionType: input.actionType, targetRefs: input.targetRefs, parameters: input.parameters, rationale: input.rationale, evidenceRefs: input.evidenceRefs, idempotencyKey: input.idempotencyKey, createdByAgentSessionId: input.createdByAgentSessionId, expiresAt: input.expiresAt, status: "PROPOSED" });
-    if (started.replayed) return { value: started.action, actionId: started.action.id, replayed: true };
+    const started = await startAction(tx, ctx, {
+      actionType: input.actionType,
+      targetRefs: input.targetRefs,
+      parameters: input.parameters,
+      rationale: input.rationale,
+      evidenceRefs: input.evidenceRefs,
+      idempotencyKey: input.idempotencyKey,
+      createdByAgentSessionId: input.createdByAgentSessionId,
+      expiresAt: input.expiresAt,
+      status: "PROPOSED",
+    });
+    if (started.replayed)
+      return { value: started.action, actionId: started.action.id, replayed: true };
     if (authority === "A2") {
-      await tx.insert(s.approvals).values({ organizationId: ctx.tenant.organizationId, actionId: started.action.id, requiredPermission: PERMISSIONS.APPLICATION_WRITE, requestedByUserId: ctx.actor.origin === "human" ? ctx.actor.userId : null, status: "PENDING", policyVersion: POLICY_VERSION, evidenceRefs: input.evidenceRefs, reason: input.rationale, expiresAt: input.expiresAt });
+      await tx.insert(s.approvals).values({
+        organizationId: ctx.tenant.organizationId,
+        actionId: started.action.id,
+        requiredPermission: PERMISSIONS.APPLICATION_WRITE,
+        requestedByUserId: ctx.actor.origin === "human" ? ctx.actor.userId : null,
+        status: "PENDING",
+        policyVersion: POLICY_VERSION,
+        evidenceRefs: input.evidenceRefs,
+        reason: input.rationale,
+        expiresAt: input.expiresAt,
+      });
     }
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "action.proposed", aggregateType: "action", aggregateId: started.action.id, payload: { actionType: input.actionType, authorityClass: authority }, actorType: actorType(ctx.actor), actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: actorType(ctx.actor), actorId: ctx.actor.origin === "human" ? ctx.actor.userId : null, actionType: "action_proposed", targetType: "action", targetId: started.action.id, authorityClass: authority, policyVersion: POLICY_VERSION, evidenceRefs: input.evidenceRefs, afterState: { status: "PROPOSED" }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "action.proposed",
+      aggregateType: "action",
+      aggregateId: started.action.id,
+      payload: { actionType: input.actionType, authorityClass: authority },
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: actorType(ctx.actor),
+      actorId: ctx.actor.origin === "human" ? ctx.actor.userId : null,
+      actionType: "action_proposed",
+      targetType: "action",
+      targetId: started.action.id,
+      authorityClass: authority,
+      policyVersion: POLICY_VERSION,
+      evidenceRefs: input.evidenceRefs,
+      afterState: { status: "PROPOSED" },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     return { value: started.action, actionId: started.action.id, replayed: false };
   });
 }
@@ -1269,7 +1817,14 @@ export async function recordDecision(
   db: RecruiterPalDb,
   ctx: ApplicationContext,
   rawInput: RecordDecisionInput,
-): Promise<MutationResult<{ applicationId: string; decision: string; status: string; readiness: ReadinessSnapshotResult }>> {
+): Promise<
+  MutationResult<{
+    applicationId: string;
+    decision: string;
+    status: string;
+    readiness: ReadinessSnapshotResult;
+  }>
+> {
   assertContext(ctx);
   const input = recordDecisionInputSchema.parse(rawInput);
   assertHumanAuthority(ctx.actor, PERMISSIONS.DECIDE_TERMINAL);
@@ -1277,22 +1832,111 @@ export async function recordDecision(
     const application = await getApplication(tx, ctx, input.applicationId);
     const protocol = await getProtocol(tx, ctx, application, input.protocolVersionId);
     const readiness = await persistReadiness(tx, ctx, application, protocol);
-    if ((input.decision === "HIRE" || input.decision === "REJECT") && readiness.result.status !== "READY") {
-      throw new ApplicationInvariantError("READINESS_BLOCKED", `Human decision requires READY readiness; current status is ${readiness.result.status}.`);
+    if (
+      (input.decision === "HIRE" || input.decision === "REJECT") &&
+      readiness.result.status !== "READY"
+    ) {
+      throw new ApplicationInvariantError(
+        "READINESS_BLOCKED",
+        `Human decision requires READY readiness; current status is ${readiness.result.status}.`,
+      );
     }
-    const actionType: ActionType = input.decision === "HIRE" ? "hire_candidate" : input.decision === "REJECT" ? "reject_candidate" : "propose_stage_transition";
-    const started = await startAction(tx, ctx, { actionType, targetRefs: [`application:${application.id}`], parameters: { decision: input.decision, protocolVersionId: input.protocolVersionId }, rationale: input.rationale, idempotencyKey: input.idempotencyKey, status: "EXECUTING" });
-    if (started.replayed && started.action.status === "SUCCEEDED") return { value: started.action.executionOutcome as { applicationId: string; decision: string; status: string; readiness: ReadinessSnapshotResult }, actionId: started.action.id, replayed: true };
-    const status = input.decision === "HIRE" ? "HIRED" : input.decision === "REJECT" ? "REJECTED" : application.status;
-    const stage = input.decision === "HIRE" ? "HIRED" : input.decision === "REJECT" ? "REJECTED" : application.currentStage;
+    const actionType: ActionType =
+      input.decision === "HIRE"
+        ? "hire_candidate"
+        : input.decision === "REJECT"
+          ? "reject_candidate"
+          : "propose_stage_transition";
+    const started = await startAction(tx, ctx, {
+      actionType,
+      targetRefs: [`application:${application.id}`],
+      parameters: { decision: input.decision, protocolVersionId: input.protocolVersionId },
+      rationale: input.rationale,
+      idempotencyKey: input.idempotencyKey,
+      status: "EXECUTING",
+    });
+    if (started.replayed && started.action.status === "SUCCEEDED")
+      return {
+        value: started.action.executionOutcome as {
+          applicationId: string;
+          decision: string;
+          status: string;
+          readiness: ReadinessSnapshotResult;
+        },
+        actionId: started.action.id,
+        replayed: true,
+      };
+    const status =
+      input.decision === "HIRE"
+        ? "HIRED"
+        : input.decision === "REJECT"
+          ? "REJECTED"
+          : application.status;
+    const stage =
+      input.decision === "HIRE"
+        ? "HIRED"
+        : input.decision === "REJECT"
+          ? "REJECTED"
+          : application.currentStage;
     const now = new Date();
-    const [record] = await tx.insert(s.decisionRecords).values({ organizationId: ctx.tenant.organizationId, applicationId: application.id, decision: input.decision, decidedByUserId: ctx.actor.userId, readinessSnapshotId: readiness.snapshotId, rationale: input.rationale }).returning({ id: s.decisionRecords.id });
-    if (!record) throw new ApplicationInvariantError("STALE_STATE", "Decision record write failed.");
-    if (status !== application.status || stage !== application.currentStage) await tx.update(s.applications).set({ status, currentStage: stage, lastActivityAt: now, updatedAt: now }).where(eq(s.applications.id, application.id));
-    if (status !== application.status || stage !== application.currentStage) await tx.insert(s.applicationStageEvents).values({ organizationId: ctx.tenant.organizationId, applicationId: application.id, fromStage: application.currentStage, toStage: stage, reason: input.rationale, actorType: "HUMAN", actorUserId: ctx.actor.userId, humanAuthorityRecordRef: record.id, protocolVersionId: protocol.id, occurredAt: now });
+    const [record] = await tx
+      .insert(s.decisionRecords)
+      .values({
+        organizationId: ctx.tenant.organizationId,
+        applicationId: application.id,
+        decision: input.decision,
+        decidedByUserId: ctx.actor.userId,
+        readinessSnapshotId: readiness.snapshotId,
+        rationale: input.rationale,
+      })
+      .returning({ id: s.decisionRecords.id });
+    if (!record)
+      throw new ApplicationInvariantError("STALE_STATE", "Decision record write failed.");
+    if (status !== application.status || stage !== application.currentStage)
+      await tx
+        .update(s.applications)
+        .set({ status, currentStage: stage, lastActivityAt: now, updatedAt: now })
+        .where(eq(s.applications.id, application.id));
+    if (status !== application.status || stage !== application.currentStage)
+      await tx.insert(s.applicationStageEvents).values({
+        organizationId: ctx.tenant.organizationId,
+        applicationId: application.id,
+        fromStage: application.currentStage,
+        toStage: stage,
+        reason: input.rationale,
+        actorType: "HUMAN",
+        actorUserId: ctx.actor.userId,
+        humanAuthorityRecordRef: record.id,
+        protocolVersionId: protocol.id,
+        occurredAt: now,
+      });
     const value = { applicationId: application.id, decision: input.decision, status, readiness };
-    await writeDomainEvent(tx, ctx.tenant, { eventType: "application.decision_recorded", aggregateType: "application", aggregateId: application.id, payload: { decision: input.decision, readiness: readiness.result.status, decisionRecordId: record.id }, actorType: "HUMAN", actorId: ctx.actor.userId, correlationId: ctx.correlationId });
-    await writeAudit(tx, ctx.tenant, { actorType: "HUMAN", actorId: ctx.actor.userId, actionType: actionType, targetType: "application", targetId: application.id, authorityClass: input.decision === "HIRE" || input.decision === "REJECT" ? "A3" : "A0", policyVersion: protocol.decisionReadinessRulesetVersion, beforeState: { status: application.status, currentStage: application.currentStage }, afterState: { status, currentStage: stage, decision: input.decision }, outcome: "SUCCEEDED", correlationId: ctx.correlationId });
+    await writeDomainEvent(tx, ctx.tenant, {
+      eventType: "application.decision_recorded",
+      aggregateType: "application",
+      aggregateId: application.id,
+      payload: {
+        decision: input.decision,
+        readiness: readiness.result.status,
+        decisionRecordId: record.id,
+      },
+      actorType: "HUMAN",
+      actorId: ctx.actor.userId,
+      correlationId: ctx.correlationId,
+    });
+    await writeAudit(tx, ctx.tenant, {
+      actorType: "HUMAN",
+      actorId: ctx.actor.userId,
+      actionType: actionType,
+      targetType: "application",
+      targetId: application.id,
+      authorityClass: input.decision === "HIRE" || input.decision === "REJECT" ? "A3" : "A0",
+      policyVersion: protocol.decisionReadinessRulesetVersion,
+      beforeState: { status: application.status, currentStage: application.currentStage },
+      afterState: { status, currentStage: stage, decision: input.decision },
+      outcome: "SUCCEEDED",
+      correlationId: ctx.correlationId,
+    });
     await completeAction(tx, started.action.id, value as unknown as Record<string, unknown>);
     return { value, actionId: started.action.id, replayed: false };
   });

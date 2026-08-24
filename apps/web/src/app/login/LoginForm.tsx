@@ -82,7 +82,10 @@ export function LoginForm() {
         </div>
 
         {error ? (
-          <p role="alert" className="flex items-center gap-2 rounded-control bg-danger-subtle px-3 py-2 text-[13px] text-danger">
+          <p
+            role="alert"
+            className="flex items-center gap-2 rounded-control bg-danger-subtle px-3 py-2 text-[13px] text-danger"
+          >
             <span aria-hidden>✕</span> {error}
           </p>
         ) : null}

@@ -1,0 +1,110 @@
+name: RecruiterPal quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
+  RP_APP_DATABASE_URL: postgresql://rp_app:recruiterpal@127.0.0.1:5432/recruiterpal
+  BETTER_AUTH_SECRET: ci-only-secret
+  BETTER_AUTH_URL: http://127.0.0.1:3000
+  RP_SKIP_DEV_DB: "1"
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: recruiterpal
+          POSTGRES_DB: recruiterpal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d recruiterpal"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Enable pnpm
+        shell: bash
+        run: corepack enable && corepack prepare pnpm@10.17.1 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create restricted application role
+        shell: bash
+        env:
+          PGPASSWORD: recruiterpal
+        run: |
+          psql -h 127.0.0.1 -U postgres -d recruiterpal <<'SQL'
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'rp_app') THEN
+              CREATE ROLE rp_app LOGIN PASSWORD 'recruiterpal';
+            END IF;
+          END $$;
+          SQL
+      - name: Run mandatory quality path
+        run: pnpm qa:fast
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: recruiterpal
+          POSTGRES_DB: recruiterpal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d recruiterpal"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
+      RP_APP_DATABASE_URL: postgresql://rp_app:recruiterpal@127.0.0.1:5432/recruiterpal
+      BETTER_AUTH_SECRET: ci-only-secret
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      RP_SKIP_DEV_DB: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Enable pnpm
+        shell: bash
+        run: corepack enable && corepack prepare pnpm@10.17.1 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create restricted application role
+        shell: bash
+        env:
+          PGPASSWORD: recruiterpal
+        run: |
+          psql -h 127.0.0.1 -U postgres -d recruiterpal <<'SQL'
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'rp_app') THEN
+              CREATE ROLE rp_app LOGIN PASSWORD 'recruiterpal';
+            END IF;
+          END $$;
+          SQL
+      - name: Migrate and seed Northstar world
+        run: pnpm db:migrate && pnpm db:seed
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run golden flows
+        run: pnpm test:e2e

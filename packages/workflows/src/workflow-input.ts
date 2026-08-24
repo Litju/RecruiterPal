@@ -21,9 +21,21 @@ const workflowInputSchema = z.object({
   jobId: z.string().uuid().optional(),
   resumeAt: z.coerce.date().optional(),
   now: z.coerce.date().optional(),
-  gracePeriodMs: z.number().int().nonnegative().default(24 * 60 * 60 * 1000),
-  escalationPeriodMs: z.number().int().positive().default(24 * 60 * 60 * 1000),
-  staleAfterMs: z.number().int().positive().default(24 * 60 * 60 * 1000),
+  gracePeriodMs: z
+    .number()
+    .int()
+    .nonnegative()
+    .default(24 * 60 * 60 * 1000),
+  escalationPeriodMs: z
+    .number()
+    .int()
+    .positive()
+    .default(24 * 60 * 60 * 1000),
+  staleAfterMs: z
+    .number()
+    .int()
+    .positive()
+    .default(24 * 60 * 60 * 1000),
   maxAttempts: z.number().int().positive().default(2),
 });
 
@@ -58,9 +70,29 @@ export interface WorkflowSnapshot {
 export type WorkflowPlanStep =
   | { kind: "obligation"; key: string; obligationType: string; dueAt: Date; summary: string }
   | { kind: "resolve_obligation"; key: string; obligationId: string }
-  | { kind: "action"; key: string; actionType: "send_scorecard_reminder" | "send_candidate_follow_up" | "send_status_update"; summary: string }
-  | { kind: "exception"; key: string; type: string; severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"; title: string; detail: string; deadlineAt?: Date | null }
-  | { kind: "approval"; key: string; actionType: "request_interviewer_substitution" | "book_calendar_event" | "reschedule_interview"; requiredPermission: string; rationale: string };
+  | {
+      kind: "action";
+      key: string;
+      actionType: "send_scorecard_reminder" | "send_candidate_follow_up" | "send_status_update";
+      summary: string;
+    }
+  | {
+      kind: "exception";
+      key: string;
+      type: string;
+      severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+      title: string;
+      detail: string;
+      deadlineAt?: Date | null;
+    }
+  | {
+      kind: "approval";
+      key: string;
+      actionType:
+        "request_interviewer_substitution" | "book_calendar_event" | "reschedule_interview";
+      requiredPermission: string;
+      rationale: string;
+    };
 
 export interface WorkflowPlan {
   status: "COMPLETE" | "WAITING" | "BLOCKED" | "EXECUTING";

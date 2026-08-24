@@ -38,16 +38,11 @@ afterAll(async () => {
 });
 
 /** Execute fn as the restricted rp_app role bound to a tenant setting. */
-async function asTenant<T>(
-  tenantOrgId: string | null,
-  fn: (tx) => Promise<T>,
-): Promise<T> {
+async function asTenant<T>(tenantOrgId: string | null, fn: (tx) => Promise<T>): Promise<T> {
   return db.transaction(async (tx) => {
     await tx.execute(sql`SET LOCAL ROLE rp_app`);
     if (tenantOrgId !== null) {
-      await tx.execute(
-        sql`SELECT set_config('rp.organization_id', ${tenantOrgId}, true)`,
-      );
+      await tx.execute(sql`SELECT set_config('rp.organization_id', ${tenantOrgId}, true)`);
     }
     return fn(tx);
   });
@@ -169,7 +164,9 @@ describe("RLS: cross-tenant denial", () => {
 
 describe("RLS: identity and inherited-resource fail-closed proofs", () => {
   it("does not expose organizations or users without an active tenant", async () => {
-    const noTenantOrganizations = await asTenant(null, async (tx) => tx.select().from(s.organizations));
+    const noTenantOrganizations = await asTenant(null, async (tx) =>
+      tx.select().from(s.organizations),
+    );
     const noTenantUsers = await asTenant(null, async (tx) => tx.select().from(s.users));
     const ownOrganizations = await asTenant(orgA, async (tx) => tx.select().from(s.organizations));
     const ownUsers = await asTenant(orgA, async (tx) => tx.select().from(s.users));
@@ -182,11 +179,22 @@ describe("RLS: identity and inherited-resource fail-closed proofs", () => {
   it("does not inherit sync-cursor visibility across the foreign key", async () => {
     const [connection] = await db
       .insert(s.integrationConnections)
-      .values({ organizationId: orgA, provider: "SYNTHETIC_ATS", mode: "SYNTHETIC", status: "CONNECTED" })
+      .values({
+        organizationId: orgA,
+        provider: "SYNTHETIC_ATS",
+        mode: "SYNTHETIC",
+        status: "CONNECTED",
+      })
       .returning({ id: s.integrationConnections.id });
-    await db.insert(s.syncCursors).values({ connectionId: connection!.id, resourceType: "jobs", cursorValue: "cursor-a" });
-    const visibleToA = await asTenant(orgA, async (tx) => tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)));
-    const visibleToB = await asTenant(orgB, async (tx) => tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)));
+    await db
+      .insert(s.syncCursors)
+      .values({ connectionId: connection!.id, resourceType: "jobs", cursorValue: "cursor-a" });
+    const visibleToA = await asTenant(orgA, async (tx) =>
+      tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)),
+    );
+    const visibleToB = await asTenant(orgB, async (tx) =>
+      tx.select().from(s.syncCursors).where(eq(s.syncCursors.connectionId, connection!.id)),
+    );
     expect(visibleToA).toHaveLength(1);
     expect(visibleToB).toHaveLength(0);
   });
@@ -257,10 +265,7 @@ describe("seeded golden scenarios exist", () => {
       .limit(1);
     expect(exc.length).toBe(1);
     const appId = exc[0]!.applicationId!;
-    const cards = await db
-      .select()
-      .from(s.scorecards)
-      .where(eq(s.scorecards.applicationId, appId));
+    const cards = await db.select().from(s.scorecards).where(eq(s.scorecards.applicationId, appId));
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 });

@@ -31,9 +31,12 @@ export interface PalPaneProps {
 }
 
 const INTENT_COPY: Record<string, string> = {
-  "readiness-review": "Review decision readiness and surface the human calls that are actually ready.",
-  "scorecard-chase": "Find overdue scorecards, send only idempotent reminders, and escalate continued absence.",
-  "scheduling-resolution": "Inspect participant availability and prepare a scheduling proposal without writing to a calendar.",
+  "readiness-review":
+    "Review decision readiness and surface the human calls that are actually ready.",
+  "scorecard-chase":
+    "Find overdue scorecards, send only idempotent reminders, and escalate continued absence.",
+  "scheduling-resolution":
+    "Inspect participant availability and prepare a scheduling proposal without writing to a calendar.",
 };
 
 export function PalPane(props: PalPaneProps) {
@@ -64,10 +67,13 @@ export function PalPane(props: PalPaneProps) {
       </div>
 
       <div className="mt-4 rounded-card border border-border-subtle bg-surface-2 p-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pal-text">Current context</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pal-text">
+          Current context
+        </p>
         <p className="mt-1 text-[13px] font-medium">{props.contextLabel}</p>
         <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
-          Pal is grounded in this organization, its permissions, current work, evidence, and durable workflow state.
+          Pal is grounded in this organization, its permissions, current work, evidence, and durable
+          workflow state.
         </p>
       </div>
 
@@ -87,7 +93,9 @@ export function PalPane(props: PalPaneProps) {
 
       <dl className="mt-4 grid grid-cols-2 gap-2" aria-label="Pal execution context counts">
         <div className="rounded-card border border-border-subtle p-2.5">
-          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">Needs attention</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">
+            Needs attention
+          </dt>
           <dd className="mt-1 text-lg font-semibold tabular">{props.activeExceptions}</dd>
         </div>
         <div className="rounded-card border border-border-subtle p-2.5">
@@ -95,20 +103,34 @@ export function PalPane(props: PalPaneProps) {
           <dd className="mt-1 text-lg font-semibold tabular">{props.deadlineCount}</dd>
         </div>
         <div className="rounded-card border border-border-subtle p-2.5">
-          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">Readiness review</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">
+            Readiness review
+          </dt>
           <dd className="mt-1 text-lg font-semibold tabular">{props.readinessReview}</dd>
         </div>
         <div className="rounded-card border border-border-subtle p-2.5">
-          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">Active workflows</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">
+            Active workflows
+          </dt>
           <dd className="mt-1 text-lg font-semibold tabular">{props.activeWorkflows}</dd>
         </div>
       </dl>
 
-      <div className={`mt-4 rounded-card border p-3 ${props.provider.configured ? "border-success/30 bg-success-subtle" : "border-warning/30 bg-warning-subtle"}`}>
+      <div
+        className={`mt-4 rounded-card border p-3 ${props.provider.configured ? "border-success/30 bg-success-subtle" : "border-warning/30 bg-warning-subtle"}`}
+      >
         <div className="flex items-start gap-2">
-          {props.provider.configured ? <ShieldCheck className="mt-0.5 size-4 text-success" aria-hidden /> : <span className="mt-0.5 text-warning" aria-hidden>!</span>}
+          {props.provider.configured ? (
+            <ShieldCheck className="mt-0.5 size-4 text-success" aria-hidden />
+          ) : (
+            <span className="mt-0.5 text-warning" aria-hidden>
+              !
+            </span>
+          )}
           <div>
-            <p className="text-[12px] font-semibold">{props.provider.configured ? "Model runtime ready" : "Model runtime paused"}</p>
+            <p className="text-[12px] font-semibold">
+              {props.provider.configured ? "Model runtime ready" : "Model runtime paused"}
+            </p>
             <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
               {props.provider.configured
                 ? `${props.provider.model} is available through the server-only Eve adapter.`
@@ -120,34 +142,67 @@ export function PalPane(props: PalPaneProps) {
 
       <div className="mt-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary">Recommended actions</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
+            Recommended actions
+          </p>
           <span className="text-[11px] text-text-tertiary">human authority stays explicit</span>
         </div>
         <div className="mt-2 space-y-1.5">
-          <Link href="/decisions" className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2">
-            <span>Review decision readiness</span><ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
+          <Link
+            href="/decisions"
+            className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2"
+          >
+            <span>Review decision readiness</span>
+            <ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
           </Link>
-          <Link href="/interviews?intent=scorecard-chase" className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2">
-            <span>Inspect scorecard chase</span><ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
+          <Link
+            href="/interviews?intent=scorecard-chase"
+            className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2"
+          >
+            <span>Inspect scorecard chase</span>
+            <ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
           </Link>
-          <Link href="/activity" className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2">
-            <span>Open execution timeline</span><ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
+          <Link
+            href="/activity"
+            className="flex items-center justify-between rounded-control border border-border-subtle px-3 py-2 text-[12px] transition-colors hover:bg-surface-2"
+          >
+            <span>Open execution timeline</span>
+            <ArrowUpRight className="size-3.5 text-pal-text" aria-hidden />
           </Link>
         </div>
       </div>
 
       <div className="mt-4 border-t border-border-subtle pt-3">
-        <button type="button" onClick={() => setShowTimeline((value) => !value)} className="flex w-full items-center justify-between text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
-          <span>Pal-completed work</span><span aria-hidden>{showTimeline ? "−" : "+"}</span>
+        <button
+          type="button"
+          onClick={() => setShowTimeline((value) => !value)}
+          className="flex w-full items-center justify-between text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary"
+        >
+          <span>Pal-completed work</span>
+          <span aria-hidden>{showTimeline ? "−" : "+"}</span>
         </button>
         {showTimeline ? (
           <ul className="mt-2 space-y-2" role="list">
-            {props.automatedActivity.length === 0 ? <li className="text-[12px] text-text-tertiary">No automated work recorded yet.</li> : props.automatedActivity.map((activity) => (
-              <li key={activity.id} className="border-l-2 border-pal/40 pl-2.5 text-[12px]">
-                <p className="font-medium">{activity.actionType.replace(/_/g, " ").toLowerCase()}</p>
-                <p className="mt-0.5 text-text-tertiary">{activity.actorType.toLowerCase()} · {activity.outcome.toLowerCase()} · {new Date(activity.occurredAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
-              </li>
-            ))}
+            {props.automatedActivity.length === 0 ? (
+              <li className="text-[12px] text-text-tertiary">No automated work recorded yet.</li>
+            ) : (
+              props.automatedActivity.map((activity) => (
+                <li key={activity.id} className="border-l-2 border-pal/40 pl-2.5 text-[12px]">
+                  <p className="font-medium">
+                    {activity.actionType.replace(/_/g, " ").toLowerCase()}
+                  </p>
+                  <p className="mt-0.5 text-text-tertiary">
+                    {activity.actorType.toLowerCase()} · {activity.outcome.toLowerCase()} ·{" "}
+                    {new Date(activity.occurredAt).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </li>
+              ))
+            )}
           </ul>
         ) : null}
       </div>

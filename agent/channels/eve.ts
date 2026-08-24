@@ -11,10 +11,19 @@ const betterAuthSession: AuthFn<Request> = async (request): Promise<SessionAuthC
   const cookie = request.headers.get("cookie");
   if (!baseUrl || !cookie) return null;
   try {
-    const response = await fetch(`${baseUrl.replace(/\/$/u, "")}/api/agent/context`, { headers: { cookie }, cache: "no-store" });
+    const response = await fetch(`${baseUrl.replace(/\/$/u, "")}/api/agent/context`, {
+      headers: { cookie },
+      cache: "no-store",
+    });
     if (!response.ok) return null;
-    const context = (await response.json()) as { userId?: string; organizationId?: string; role?: string; permissions?: string[] };
-    if (!context.userId || !context.organizationId || !context.role || !context.permissions) return null;
+    const context = (await response.json()) as {
+      userId?: string;
+      organizationId?: string;
+      role?: string;
+      permissions?: string[];
+    };
+    if (!context.userId || !context.organizationId || !context.role || !context.permissions)
+      return null;
     return {
       principalId: context.userId,
       principalType: "user",
@@ -39,9 +48,12 @@ export default eveChannel({
     const organizationId = caller?.attributes.organizationId;
     const actorUserId = caller?.attributes.userId ?? caller?.principalId;
     const role = caller?.attributes.role;
-    const context = organizationId && actorUserId && role
-      ? [`RecruiterPal authenticated context: organizationId=${organizationId}; actorUserId=${actorUserId}; role=${role}. Use typed tools and preserve this context.`]
-      : [];
+    const context =
+      organizationId && actorUserId && role
+        ? [
+            `RecruiterPal authenticated context: organizationId=${organizationId}; actorUserId=${actorUserId}; role=${role}. Use typed tools and preserve this context.`,
+          ]
+        : [];
     void message;
     return { auth, context };
   },

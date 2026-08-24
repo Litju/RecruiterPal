@@ -8,9 +8,21 @@ import { Command, Search } from "lucide-react";
 const COMMANDS = [
   { label: "Open Today", detail: "Execution surface", href: "/today" },
   { label: "Open pipeline", detail: "Inspect stage flow", href: "/pipeline" },
-  { label: "Review decision readiness", detail: "Human review queue", href: "/today?intent=readiness-review" },
-  { label: "Chase overdue scorecards", detail: "Safe reminder workflow", href: "/today?intent=scorecard-chase" },
-  { label: "Resolve scheduling", detail: "Find safe interview options", href: "/today?intent=scheduling-resolution" },
+  {
+    label: "Review decision readiness",
+    detail: "Human review queue",
+    href: "/today?intent=readiness-review",
+  },
+  {
+    label: "Chase overdue scorecards",
+    detail: "Safe reminder workflow",
+    href: "/today?intent=scorecard-chase",
+  },
+  {
+    label: "Resolve scheduling",
+    detail: "Find safe interview options",
+    href: "/today?intent=scheduling-resolution",
+  },
   { label: "Open candidate workspace", detail: "Evidence and scorecards", href: "/candidates" },
   { label: "View execution timeline", detail: "Append-only audit ledger", href: "/activity" },
 ] as const;
@@ -23,7 +35,10 @@ export function CommandPalette() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
   const filtered = useMemo(
-    () => COMMANDS.filter((command) => `${command.label} ${command.detail}`.toLowerCase().includes(query.toLowerCase())),
+    () =>
+      COMMANDS.filter((command) =>
+        `${command.label} ${command.detail}`.toLowerCase().includes(query.toLowerCase()),
+      ),
     [query],
   );
   const openPalette = useCallback(() => {
@@ -65,7 +80,9 @@ export function CommandPalette() {
       >
         <Command className="size-3.5" aria-hidden />
         <span className="hidden sm:inline">Command palette</span>
-        <kbd className="rounded border border-border-subtle bg-surface-2 px-1.5 py-0.5 text-[10px]">⌘K</kbd>
+        <kbd className="rounded border border-border-subtle bg-surface-2 px-1.5 py-0.5 text-[10px]">
+          ⌘K
+        </kbd>
       </button>
 
       <AnimatePresence>
@@ -89,11 +106,15 @@ export function CommandPalette() {
               onKeyDown={(event) => {
                 if (event.key === "ArrowDown") {
                   event.preventDefault();
-                  setSelected((current) => filtered.length === 0 ? 0 : (current + 1) % filtered.length);
+                  setSelected((current) =>
+                    filtered.length === 0 ? 0 : (current + 1) % filtered.length,
+                  );
                 }
                 if (event.key === "ArrowUp") {
                   event.preventDefault();
-                  setSelected((current) => filtered.length === 0 ? 0 : (current - 1 + filtered.length) % filtered.length);
+                  setSelected((current) =>
+                    filtered.length === 0 ? 0 : (current - 1 + filtered.length) % filtered.length,
+                  );
                 }
                 if (event.key === "Enter" && filtered[selected]) run(filtered[selected].href);
               }}
@@ -111,10 +132,14 @@ export function CommandPalette() {
                   className="h-12 min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-text-tertiary"
                   aria-label="Search commands"
                 />
-                <kbd className="rounded border border-border-subtle px-1.5 py-0.5 text-[10px] text-text-tertiary">Esc</kbd>
+                <kbd className="rounded border border-border-subtle px-1.5 py-0.5 text-[10px] text-text-tertiary">
+                  Esc
+                </kbd>
               </div>
               <div className="p-2">
-                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">Commands</p>
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+                  Commands
+                </p>
                 {filtered.length === 0 ? (
                   <p className="px-2 py-5 text-[13px] text-text-secondary">No matching command.</p>
                 ) : (
@@ -128,8 +153,12 @@ export function CommandPalette() {
                           className={`flex w-full items-center justify-between gap-4 rounded-control px-3 py-2 text-left ${index === selected ? "bg-pal-subtle" : "hover:bg-surface-2"}`}
                         >
                           <span className="min-w-0">
-                            <span className="block truncate text-[13px] font-medium">{command.label}</span>
-                            <span className="block truncate text-[11px] text-text-secondary">{command.detail}</span>
+                            <span className="block truncate text-[13px] font-medium">
+                              {command.label}
+                            </span>
+                            <span className="block truncate text-[11px] text-text-secondary">
+                              {command.detail}
+                            </span>
                           </span>
                           <span className="shrink-0 text-[11px] text-pal-text">↵</span>
                         </button>

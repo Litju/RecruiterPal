@@ -11,33 +11,37 @@ export default async function DecisionsPage() {
   const session = await getSession(getAuth());
   if (!session) return null;
   // Latest readiness snapshot per active application (deterministic states).
-  const rows = await withSessionTenant(session, (tx) => tx
-    .select({
-      applicationId: applications.id,
-      candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
-      jobTitle: jobs.title,
-      stage: applications.currentStage,
-    })
-    .from(applications)
-    .innerJoin(candidates, eq(candidates.id, applications.candidateId))
-    .innerJoin(jobs, eq(jobs.id, applications.jobId))
-    .where(
-      and(
-        eq(applications.organizationId, session.organizationId),
-        eq(applications.status, "ACTIVE"),
-        eq(applications.currentStage, "DECISION"),
-      ),
-    )
-    .orderBy(desc(applications.lastActivityAt))
-    .limit(100));
+  const rows = await withSessionTenant(session, (tx) =>
+    tx
+      .select({
+        applicationId: applications.id,
+        candidateName: sql<string>`${candidates.firstName} || ' ' || ${candidates.lastName}`,
+        jobTitle: jobs.title,
+        stage: applications.currentStage,
+      })
+      .from(applications)
+      .innerJoin(candidates, eq(candidates.id, applications.candidateId))
+      .innerJoin(jobs, eq(jobs.id, applications.jobId))
+      .where(
+        and(
+          eq(applications.organizationId, session.organizationId),
+          eq(applications.status, "ACTIVE"),
+          eq(applications.currentStage, "DECISION"),
+        ),
+      )
+      .orderBy(desc(applications.lastActivityAt))
+      .limit(100),
+  );
 
-  const snapshots = await withSessionTenant(session, (tx) => tx
-    .select()
-    .from(decisionReadinessSnapshots)
-    .where(eq(decisionReadinessSnapshots.organizationId, session.organizationId))
-    .orderBy(desc(decisionReadinessSnapshots.computedAt))
-    .limit(300));
-  const latestByApp = new Map<string, typeof snapshots[number]>();
+  const snapshots = await withSessionTenant(session, (tx) =>
+    tx
+      .select()
+      .from(decisionReadinessSnapshots)
+      .where(eq(decisionReadinessSnapshots.organizationId, session.organizationId))
+      .orderBy(desc(decisionReadinessSnapshots.computedAt))
+      .limit(300),
+  );
+  const latestByApp = new Map<string, (typeof snapshots)[number]>();
   for (const s of snapshots) {
     if (!latestByApp.has(s.applicationId)) latestByApp.set(s.applicationId, s);
   }
@@ -76,10 +80,16 @@ export default async function DecisionsPage() {
                     <span
                       className={`inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold ${STATUS_STYLE[status] ?? "bg-surface-3"}`}
                     >
-                      {(snap?.reasons.length ?? 0) > 0 || status !== "READY" ? status.replace(/_/g, " ") : "READY FOR HUMAN DECISION"}
+                      {(snap?.reasons.length ?? 0) > 0 || status !== "READY"
+                        ? status.replace(/_/g, " ")
+                        : "READY FOR HUMAN DECISION"}
                     </span>
-                    <span className="min-w-0 truncate text-[14px] font-semibold">{r.candidateName}</span>
-                    <span className="min-w-0 truncate text-[13px] text-text-secondary">{r.jobTitle}</span>
+                    <span className="min-w-0 truncate text-[14px] font-semibold">
+                      {r.candidateName}
+                    </span>
+                    <span className="min-w-0 truncate text-[13px] text-text-secondary">
+                      {r.jobTitle}
+                    </span>
                   </div>
                   {snap && snap.reasons.length > 0 ? (
                     <ul className="mt-2 space-y-1">

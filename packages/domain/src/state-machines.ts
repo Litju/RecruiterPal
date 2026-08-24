@@ -23,8 +23,10 @@ export const APPLICATION_STATUSES = [
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 /** Consequential terminal states require configured human authority. */
-export const CONSEQUENTIAL_APPLICATION_STATUSES: ReadonlySet<ApplicationStatus> =
-  new Set(["REJECTED", "HIRED"]);
+export const CONSEQUENTIAL_APPLICATION_STATUSES: ReadonlySet<ApplicationStatus> = new Set([
+  "REJECTED",
+  "HIRED",
+]);
 
 export const INTERVIEW_STATUSES = [
   "PLANNED",
@@ -151,10 +153,7 @@ export function canTransitionInterview(from: InterviewStatus, to: InterviewStatu
   return INTERVIEW_TRANSITIONS[from].includes(to);
 }
 
-export function assertInterviewTransition(
-  from: InterviewStatus,
-  to: InterviewStatus,
-): void {
+export function assertInterviewTransition(from: InterviewStatus, to: InterviewStatus): void {
   if (!canTransitionInterview(from, to))
     throw new IllegalTransitionError("interview_status", from, to);
 }
@@ -163,10 +162,7 @@ export function canTransitionScorecard(from: ScorecardStatus, to: ScorecardStatu
   return SCORECARD_TRANSITIONS[from].includes(to);
 }
 
-export function assertScorecardTransition(
-  from: ScorecardStatus,
-  to: ScorecardStatus,
-): void {
+export function assertScorecardTransition(from: ScorecardStatus, to: ScorecardStatus): void {
   if (!canTransitionScorecard(from, to))
     throw new IllegalTransitionError("scorecard_status", from, to);
 }

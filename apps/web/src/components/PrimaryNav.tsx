@@ -21,7 +21,12 @@ export interface NavCounts {
   pendingApprovals?: number;
 }
 
-const NAV: { href: string; label: string; icon: ComponentType<{ className?: string }>; badgeKey?: keyof NavCounts }[] = [
+const NAV: {
+  href: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  badgeKey?: keyof NavCounts;
+}[] = [
   { href: "/today", label: "Today", icon: Radar },
   { href: "/jobs", label: "Jobs", icon: Briefcase },
   { href: "/pipeline", label: "Pipeline", icon: ListChecks },

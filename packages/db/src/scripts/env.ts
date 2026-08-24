@@ -24,9 +24,7 @@ for (let i = 0; i < 6; i++) {
 export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value || value.trim() === "") {
-    throw new Error(
-      `${name} is required. Copy .env.example to .env.local and configure it.`,
-    );
+    throw new Error(`${name} is required. Copy .env.example to .env.local and configure it.`);
   }
   return value;
 }

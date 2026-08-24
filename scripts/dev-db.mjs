@@ -12,7 +12,9 @@ const DB = "recruiterpal";
 
 function run(cmd) {
   try {
-    return execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
+    return execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] })
+      .toString()
+      .trim();
   } catch {
     return null;
   }
@@ -36,10 +38,7 @@ if (action === "start") {
     );
     // Wait for readiness
     for (let i = 0; i < 60; i++) {
-      const ready =
-        run(
-          `docker exec ${CONTAINER} pg_isready -U postgres -d ${DB}`,
-        ) !== null;
+      const ready = run(`docker exec ${CONTAINER} pg_isready -U postgres -d ${DB}`) !== null;
       if (ready) break;
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
     }

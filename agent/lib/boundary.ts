@@ -18,7 +18,10 @@ export function authorizeTool(
   return assertAgentAccess(ctx, input, permission);
 }
 
-export function readWithTenant<T>(access: AgentAccess, fn: (tx: TenantTx) => Promise<T>): Promise<T> {
+export function readWithTenant<T>(
+  access: AgentAccess,
+  fn: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
   return withTenant(restrictedAgentDb(), access.tenant, fn);
 }
 

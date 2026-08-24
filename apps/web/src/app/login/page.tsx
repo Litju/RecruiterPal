@@ -24,8 +24,8 @@ export default async function LoginPage() {
             <h1 className="text-xl font-semibold tracking-tight">RecruiterPal</h1>
           </div>
           <p className="text-[14px] leading-relaxed text-text-secondary">
-            The agent-driven workspace for evidence-based recruiting. Sign in to
-            your recruiting portfolio.
+            The agent-driven workspace for evidence-based recruiting. Sign in to your recruiting
+            portfolio.
           </p>
         </div>
         <LoginForm />
