@@ -12,8 +12,9 @@ permissions:
 env:
   DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
   RP_APP_DATABASE_URL: postgresql://rp_app:recruiterpal@127.0.0.1:5432/recruiterpal
+  RP_TEST_DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
   BETTER_AUTH_SECRET: ci-only-secret
-  BETTER_AUTH_URL: http://127.0.0.1:3000
+  BETTER_AUTH_URL: http://localhost:3000
   RP_SKIP_DEV_DB: "1"
 
 jobs:
@@ -76,8 +77,9 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
       RP_APP_DATABASE_URL: postgresql://rp_app:recruiterpal@127.0.0.1:5432/recruiterpal
+      RP_TEST_DATABASE_URL: postgresql://postgres:recruiterpal@127.0.0.1:5432/recruiterpal
       BETTER_AUTH_SECRET: ci-only-secret
-      BETTER_AUTH_URL: http://127.0.0.1:3000
+      BETTER_AUTH_URL: http://localhost:3000
       RP_SKIP_DEV_DB: "1"
     steps:
       - uses: actions/checkout@v5
