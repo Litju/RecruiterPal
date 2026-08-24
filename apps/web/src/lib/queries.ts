@@ -3,7 +3,19 @@
  * tenant-scoped queries only.
  */
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
-import { applications, candidates, exceptions, getDb, jobs, withTenant, type TenantContext } from "@recruiterpal/db";
+import {
+  applications,
+  applicationObligations,
+  auditRecords,
+  candidates,
+  decisionReadinessSnapshots,
+  exceptions,
+  getDb,
+  jobs,
+  withTenant,
+  workflowInstances,
+  type TenantContext,
+} from "@recruiterpal/db";
 
 export interface TodayExceptionRow {
   id: string;
@@ -117,4 +129,70 @@ export async function getDeadlineApplications(context: TenantContext) {
     ...row,
     deadlineUrgent: row.deadlineAt !== null && row.deadlineAt.getTime() - Date.now() < 36 * 3600_000,
   }));
+}
+
+export interface TodayAutomatedActivity {
+  id: string;
+  actorType: string;
+  actionType: string;
+  targetType: string;
+  outcome: string;
+  occurredAt: Date;
+}
+
+export interface TodayExecutionSnapshot {
+  pendingObligations: number;
+  overdueObligations: number;
+  readinessReady: number;
+  readinessReview: number;
+  activeWorkflows: number;
+  automatedActivity: TodayAutomatedActivity[];
+}
+
+/** Deterministic execution signals used by Today and the contextual Pal pane. */
+export async function getTodayExecutionSnapshot(context: TenantContext): Promise<TodayExecutionSnapshot> {
+  return withTenant(getDb(), context, async (tx) => {
+    const now = new Date();
+    const [pendingRows, overdueRows, workflowRows, readinessRows, activityRows] = await Promise.all([
+      tx
+        .select({ n: count() })
+        .from(applicationObligations)
+        .where(and(eq(applicationObligations.organizationId, context.organizationId), eq(applicationObligations.state, "PENDING"))),
+      tx
+        .select({ n: count() })
+        .from(applicationObligations)
+        .where(and(eq(applicationObligations.organizationId, context.organizationId), eq(applicationObligations.state, "PENDING"), sql`${applicationObligations.dueAt} < ${now}`)),
+      tx
+        .select({ n: count() })
+        .from(workflowInstances)
+        .where(and(eq(workflowInstances.organizationId, context.organizationId), eq(workflowInstances.status, "RUNNING"))),
+      tx
+        .select({ applicationId: decisionReadinessSnapshots.applicationId, status: decisionReadinessSnapshots.status, computedAt: decisionReadinessSnapshots.computedAt })
+        .from(decisionReadinessSnapshots)
+        .where(eq(decisionReadinessSnapshots.organizationId, context.organizationId))
+        .orderBy(desc(decisionReadinessSnapshots.computedAt))
+        .limit(500),
+      tx
+        .select({ id: auditRecords.id, actorType: auditRecords.actorType, actionType: auditRecords.actionType, targetType: auditRecords.targetType, outcome: auditRecords.outcome, occurredAt: auditRecords.occurredAt })
+        .from(auditRecords)
+        .where(and(eq(auditRecords.organizationId, context.organizationId), inArray(auditRecords.actorType, ["AGENT", "WORKFLOW"])))
+        .orderBy(desc(auditRecords.occurredAt))
+        .limit(6),
+    ]);
+
+    const latestReadiness = new Map<string, string>();
+    for (const row of readinessRows) {
+      if (!latestReadiness.has(row.applicationId)) latestReadiness.set(row.applicationId, row.status);
+    }
+    const readinessValues = [...latestReadiness.values()];
+
+    return {
+      pendingObligations: pendingRows[0]?.n ?? 0,
+      overdueObligations: overdueRows[0]?.n ?? 0,
+      readinessReady: readinessValues.filter((status) => status === "READY").length,
+      readinessReview: readinessValues.filter((status) => status !== "READY").length,
+      activeWorkflows: workflowRows[0]?.n ?? 0,
+      automatedActivity: activityRows,
+    };
+  });
 }

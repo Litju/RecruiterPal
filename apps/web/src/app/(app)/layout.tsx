@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { withSessionTenant } from "@/lib/tenant-db";
 import { exceptions, approvals, organizations } from "@recruiterpal/db";
 import { PrimaryNav } from "@/components/PrimaryNav";
+import { CommandPalette } from "@/components/CommandPalette";
 
 export default async function AppLayout({
   children,
@@ -40,6 +41,7 @@ export default async function AppLayout({
         />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      <CommandPalette />
     </div>
   );
 }
