@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuditRecord",
+  "type": "object",
+  "required": [
+    "id",
+    "organizationId",
+    "actorType",
+    "actionType",
+    "targetType",
+    "targetId",
+    "authorityClass",
+    "policyVersion",
+    "occurredAt",
+    "outcome"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "organizationId": {
+      "type": "string"
+    },
+    "actorType": {
+      "enum": [
+        "HUMAN",
+        "AGENT",
+        "WORKFLOW",
+        "INTEGRATION"
+      ]
+    },
+    "actorId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actionType": {
+      "type": "string"
+    },
+    "targetType": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "authorityClass": {
+      "enum": [
+        "A0",
+        "A1",
+        "A2",
+        "A3"
+      ]
+    },
+    "policyVersion": {
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

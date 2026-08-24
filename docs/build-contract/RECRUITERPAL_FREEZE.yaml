@@ -1,0 +1,64 @@
+freeze_id: RP-FREEZE-2026-08-24-v1.1
+status: FROZEN_FOR_ONE_SHOT_IMPLEMENTATION
+product:
+  name: RecruiterPal
+  tagline: "The agent-driven workspace for evidence-based recruiting"
+  primary_problem: recruiter_orchestration_debt
+  repository: fresh_clean_room
+architecture:
+  product_language: TypeScript
+  web: Next.js
+  ui: React
+  agent_framework: Eve
+  eve_verified_baseline: "0.44.3"
+  model_provider: OpenCode_Go
+  model_protocol: openai-responses
+  model_endpoint: "https://opencode.ai/zen/go/v1"
+  model_env: OPENCODE_GO_API_KEY
+  initial_model: gpt-5.6-luna
+  deterministic_durability: Vercel_Workflow_SDK
+  canonical_database: PostgreSQL_18
+  hosted_database: Neon
+  orm: Drizzle
+  auth: Better_Auth
+  python_policy: optional_science_ml_only
+  temporal_v1: forbidden_without_ADR
+computational_hierarchy:
+  - deterministic_domain_code
+  - vercel_workflow
+  - postgresql_truth
+  - eve_agent_runtime
+  - statistical_ml_services
+  - human_consequential_authority
+invariants:
+  - llm_never_source_of_truth
+  - no_direct_llm_database_credentials
+  - no_arbitrary_llm_sql
+  - tenant_scope_fail_closed
+  - protected_attributes_not_used_for_advancement
+  - no_autonomous_reject_or_hire
+  - no_opaque_candidate_fit_score
+  - evidence_requires_provenance
+  - hiring_protocols_are_versioned
+  - consequential_actions_require_human_authority
+  - deterministic_tasks_are_implemented_deterministically
+  - every_material_side_effect_is_audited
+  - no_pwc_challenge_artifact_transfer
+ux:
+  pal_is_ambient_not_chat_widget: true
+  primary_surface: Today
+  command_palette: required
+  keyboard_first: true
+  contextual_ui_intents: required
+  purposeful_motion: required
+quality:
+  prep_push: mandatory
+  ci: mandatory
+  rls_tests: mandatory
+  eve_evals: mandatory
+  playwright_golden_flows: mandatory
+  secret_scan: mandatory
+  clean_room_scan: mandatory
+release:
+  next_security_patch_gate: required
+  deployment_truth_only: true

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActionProposal",
+  "type": "object",
+  "required": [
+    "id",
+    "actionType",
+    "targetRefs",
+    "parameters",
+    "rationale",
+    "evidenceRefs",
+    "requestedAuthorityClass",
+    "createdByAgentSessionId"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "actionType": {
+      "type": "string"
+    },
+    "targetRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requestedAuthorityClass": {
+      "enum": [
+        "A0",
+        "A1",
+        "A2",
+        "A3"
+      ]
+    },
+    "createdByAgentSessionId": {
+      "type": "string"
+    },
+    "expiresAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

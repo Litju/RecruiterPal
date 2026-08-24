@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+dist/
+out/
+build/
+*.tsbuildinfo
+.turbo/
+
+# env — never commit real environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+.pgdata/
+
+# python (optional science service)
+__pycache__/
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# local runtime state
+*.log
+.eve/

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PalResponse",
+  "type": "object",
+  "required": [
+    "summary",
+    "evidenceRefs",
+    "uiIntents",
+    "actionProposals",
+    "uncertaintyFlags",
+    "requiresHumanReview",
+    "runtimeStatus"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uiIntents": {
+      "type": "array",
+      "items": {
+        "$ref": "UIIntent.schema.json"
+      }
+    },
+    "actionProposals": {
+      "type": "array",
+      "items": {
+        "$ref": "ActionProposal.schema.json"
+      }
+    },
+    "uncertaintyFlags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiresHumanReview": {
+      "type": "boolean"
+    },
+    "runtimeStatus": {
+      "enum": [
+        "ACCEPTED",
+        "RETRIEVING",
+        "EXECUTING",
+        "WAITING",
+        "APPROVAL_REQUIRED",
+        "COMPLETED",
+        "FAILED"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

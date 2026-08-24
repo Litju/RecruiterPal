@@ -1,0 +1,171 @@
+{
+  "freeze_id": "RP-FREEZE-2026-08-24-v1.1",
+  "generated_utc": "2026-08-24T04:42:00Z",
+  "files": [
+    {
+      "path": "00_MASTER_INDEX.md",
+      "sha256": "dc10e4432f4e5df454bee2544b23d291bb53dab24303f97acca6000fe264a7d3",
+      "bytes": 8279
+    },
+    {
+      "path": "01_PRODUCT_CONSTITUTION.md",
+      "sha256": "03769e1c15efe0bb0fd42cf850ecdcfb523351b05bfb2611c3125a965e8b94c3",
+      "bytes": 5890
+    },
+    {
+      "path": "02_PRODUCT_REQUIREMENTS_AND_SCOPE.md",
+      "sha256": "7ce370b4f62de10cb5e6308fc8e6c4bd77572b2fb21e8d78ddfc035b73b15094",
+      "bytes": 6401
+    },
+    {
+      "path": "03_DOMAIN_MODEL_AND_STATE_MACHINES.md",
+      "sha256": "5ce4f29a91d75832e90bcede66fcfcb04bb9372c7f100405deac7d3dd27fcf7f",
+      "bytes": 6840
+    },
+    {
+      "path": "04_SYSTEM_ARCHITECTURE.md",
+      "sha256": "1cf12f020fdc1e0f1759e410c69893fa4231ecd00d9bf4c661e16ddad93ef0da",
+      "bytes": 10110
+    },
+    {
+      "path": "05_DURABLE_WORKFLOW_CONTRACTS.md",
+      "sha256": "fdd52fa4c196c3ce8bf15b144cdb86a24e8d9387b5d50f88bb83669c477e0e5f",
+      "bytes": 6333
+    },
+    {
+      "path": "06_EVE_AGENT_ARCHITECTURE.md",
+      "sha256": "c40a39877044ea0ac1d9ca7b9aa0709d6df8ed22b450925b10384c22f5fcca52",
+      "bytes": 7280
+    },
+    {
+      "path": "07_DATA_EVIDENCE_SELECTION_SCIENCE.md",
+      "sha256": "bcf499bdc740cb89562258f70ec58a41c1ea1c0a2295e5317b83ae1716a79d02",
+      "bytes": 6773
+    },
+    {
+      "path": "08_UX_UI_CONSTITUTION.md",
+      "sha256": "fe76c509da09a032fa5ce14afb434fe0c9c1d61092a62155abe483ddcae4341c",
+      "bytes": 9021
+    },
+    {
+      "path": "09_DESIGN_SYSTEM_COMPONENT_CATALOG.md",
+      "sha256": "8075f539d3a5be4a097996dd162c8f8a1510ccca7f8a8c526721adb19cc020da",
+      "bytes": 7370
+    },
+    {
+      "path": "10_SECURITY_PRIVACY_GOVERNANCE.md",
+      "sha256": "86f3ccbafa2dc8c408bac65f4f5d165ac77253942acc24b58721c61fb900188e",
+      "bytes": 6153
+    },
+    {
+      "path": "11_INTEGRATIONS_EXTERNAL_SYSTEMS.md",
+      "sha256": "c033515eb13c7dfd14f4d6804c7bd00d379422d2f1a70699f63c1a612e200eae",
+      "bytes": 4319
+    },
+    {
+      "path": "12_OBSERVABILITY_AUDIT_EVALS.md",
+      "sha256": "2fc612ced7cc7763168021aa80fec106a93cf84d7d627b47896261f659ce763d",
+      "bytes": 4504
+    },
+    {
+      "path": "13_TESTING_QA_PREPUSH_CICD.md",
+      "sha256": "6158b942df9a4c9ccc9a1c781d25d530333e7dabe46b3d113e9aed0ff6755842",
+      "bytes": 5108
+    },
+    {
+      "path": "14_DEPLOYMENT_ENVIRONMENTS.md",
+      "sha256": "042cc7e9f9d83fa6a4ea23902e0f184433bf36e7e403edeba93e380087c769a7",
+      "bytes": 2611
+    },
+    {
+      "path": "15_DATABASE_SCHEMA_AND_DATA_CONTRACTS.md",
+      "sha256": "58b9b17870ccb175228e9bc4094772f97085b02d9088eae2d677aa78cfaba05f",
+      "bytes": 3606
+    },
+    {
+      "path": "16_API_TOOL_AND_UI_INTENT_CONTRACTS.md",
+      "sha256": "6c1a98f87fe86e9b95a9891ddd602cecf720d286f7ffb086d661e8533aa0eff1",
+      "bytes": 2234
+    },
+    {
+      "path": "17_DEMO_SEED_AND_GOLDEN_FLOWS.md",
+      "sha256": "2662fce523cadf526150df7603b92fee27d0deb8cbedd7d5776818f6e858a146",
+      "bytes": 2683
+    },
+    {
+      "path": "18_MILESTONES_BUILD_SEQUENCE.md",
+      "sha256": "9c52777245a9d8a79be6f7bc859608293e3b02056d0173bd4674ce8225d0ad03",
+      "bytes": 2525
+    },
+    {
+      "path": "19_DEFINITION_OF_DONE_ACCEPTANCE_MATRIX.md",
+      "sha256": "d3276e2a05fd307d66a98f590b52ddfb2cc3ea7a49b72e9665261f3e5e8b9e6d",
+      "bytes": 2791
+    },
+    {
+      "path": "20_PROVENANCE_CLEAN_ROOM.md",
+      "sha256": "40fe0a1aec76c4758c1cba9ad0a338bf0c57f2b231d55cd563b1a73f55a64408",
+      "bytes": 1857
+    },
+    {
+      "path": "21_ARCHITECTURE_DECISIONS.md",
+      "sha256": "07d24144e9a3797b9da53c7faa880cbd02d5183e8c864879621b739a63d332be",
+      "bytes": 2602
+    },
+    {
+      "path": "22_ONE_SHOT_EXECUTION_PROMPT.md",
+      "sha256": "979714535a0c8797006bba28aa5ea24bc20a6872eeec9068201e713c23ae3ad6",
+      "bytes": 12837
+    },
+    {
+      "path": "23_SHIP_RECEIPT_TEMPLATE.md",
+      "sha256": "3ff6edb627c9117bba3927ce1f5b77d190ca827c0850cb31897ec7574f7392f4",
+      "bytes": 1371
+    },
+    {
+      "path": "24_RESEARCH_REFERENCE_REGISTER.md",
+      "sha256": "a92fed26db0eccec91e8afbc9dd43c15c302712044e9290a42ff8e9a2907e4de",
+      "bytes": 2600
+    },
+    {
+      "path": "README.md",
+      "sha256": "837da3bebb19d0fd6ed41f41c86ff18117b2864d5d7bd5ea306abd5f8f8b9242",
+      "bytes": 579
+    },
+    {
+      "path": "RECRUITERPAL_FREEZE.yaml",
+      "sha256": "23bdeec1d46be9703a9ce00a17f960be5770624b56711265f290f2d5c1d49b69",
+      "bytes": 1921
+    },
+    {
+      "path": "adr/README.md",
+      "sha256": "11d9328f28f2b82a391ae323f5e7dee8d1782d6fda2d24af59bcbc88baab8808",
+      "bytes": 176
+    },
+    {
+      "path": "contracts/ActionProposal.schema.json",
+      "sha256": "a43051690c6265d73c3e57f3eaa902fc5eafa2be480728435c38b4466449acda",
+      "bytes": 1038
+    },
+    {
+      "path": "contracts/AuditRecord.schema.json",
+      "sha256": "2aff067bbbf9da767a3d779b1d000bc33b03181c64ab63326898b7945d7280b2",
+      "bytes": 1204
+    },
+    {
+      "path": "contracts/InteractionContext.schema.json",
+      "sha256": "26fe1450356baf71a76d7a946f76a9089f1ce860d5f095bceee44fb7f19dc2a7",
+      "bytes": 1172
+    },
+    {
+      "path": "contracts/PalResponse.schema.json",
+      "sha256": "6ff92babe62b534c4a1a1076beaab2356ae9ab137d3db09211d879b673a2dd42",
+      "bytes": 1088
+    },
+    {
+      "path": "contracts/UIIntent.schema.json",
+      "sha256": "1c0432b74912828de3fa29ac4117b9b528563afea06bc2ae22a9984e49a72bb2",
+      "bytes": 680
+    }
+  ]
+}
