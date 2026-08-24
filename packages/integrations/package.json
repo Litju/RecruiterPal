@@ -1,0 +1,26 @@
+{
+  "name": "@recruiterpal/integrations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@recruiterpal/contracts": "workspace:*",
+    "@recruiterpal/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@recruiterpal/tsconfig": "workspace:*",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

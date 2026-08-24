@@ -1,0 +1,27 @@
+{
+  "name": "@recruiterpal/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./agent.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "evals": "tsx ../evals/run-evals.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.46",
+    "@recruiterpal/agent-runtime": "workspace:*",
+    "@recruiterpal/contracts": "workspace:*",
+    "@recruiterpal/db": "workspace:*",
+    "@recruiterpal/domain": "workspace:*",
+    "eve": "0.44.3",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@recruiterpal/tsconfig": "workspace:*",
+    "tsx": "^4.20.5",
+    "typescript": "5.9.3"
+  }
+}

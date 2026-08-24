@@ -1,0 +1,41 @@
+{
+  "name": "@recruiterpal/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.46",
+    "@recruiterpal/agent-runtime": "workspace:*",
+    "@recruiterpal/auth": "workspace:*",
+    "@recruiterpal/contracts": "workspace:*",
+    "@recruiterpal/db": "workspace:*",
+    "@recruiterpal/domain": "workspace:*",
+    "@recruiterpal/integrations": "workspace:*",
+    "@recruiterpal/observability": "workspace:*",
+    "@recruiterpal/ui": "workspace:*",
+    "@recruiterpal/workflows": "workspace:*",
+    "eve": "0.44.3",
+    "motion": "^13.1.1",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "workflow": "^4.8.4",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@recruiterpal/tsconfig": "workspace:*",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.3.3",
+    "typescript": "5.9.3"
+  }
+}
