@@ -8,8 +8,8 @@ import { and, eq, gte, lte, asc, inArray } from "drizzle-orm";
 
 const inputSchema = baseToolInput.extend({
   interviewId: z.string().uuid(),
-  fromUtc: z.coerce.date(),
-  toUtc: z.coerce.date(),
+  fromUtc: z.iso.datetime(),
+  toUtc: z.iso.datetime(),
 });
 
 export default defineTool({
@@ -19,6 +19,8 @@ export default defineTool({
   outputSchema: listOutput,
   async execute(input, ctx) {
     const access = authorizeTool(ctx, input, PERMISSIONS.INTERVIEW_READ, "A0");
+    const fromUtc = new Date(input.fromUtc);
+    const toUtc = new Date(input.toUtc);
     return readWithTenant(access, async (tx) => {
       const [interview] = await tx
         .select({
@@ -63,8 +65,8 @@ export default defineTool({
                 and(
                   eq(s.availabilityWindows.organizationId, access.tenant.organizationId),
                   inArray(s.availabilityWindows.userId, userIds),
-                  gte(s.availabilityWindows.endUtc, input.fromUtc),
-                  lte(s.availabilityWindows.startUtc, input.toUtc),
+                  gte(s.availabilityWindows.endUtc, fromUtc),
+                  lte(s.availabilityWindows.startUtc, toUtc),
                 ),
               )
               .orderBy(asc(s.availabilityWindows.startUtc));
@@ -80,8 +82,8 @@ export default defineTool({
         .where(
           and(
             eq(s.calendarEvents.organizationId, access.tenant.organizationId),
-            gte(s.calendarEvents.endUtc, input.fromUtc),
-            lte(s.calendarEvents.startUtc, input.toUtc),
+            gte(s.calendarEvents.endUtc, fromUtc),
+            lte(s.calendarEvents.startUtc, toUtc),
           ),
         );
       return { ok: true, data: { interview, participants, availability, calendarEvents } };

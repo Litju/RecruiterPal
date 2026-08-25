@@ -10,8 +10,8 @@ import { z } from "zod";
 
 const inputSchema = baseToolInput.extend({
   interviewId: z.string().uuid(),
-  startUtc: z.coerce.date(),
-  endUtc: z.coerce.date(),
+  startUtc: z.iso.datetime(),
+  endUtc: z.iso.datetime(),
   rationale: z.string().trim().min(1).max(2000),
 });
 
@@ -23,7 +23,9 @@ export default defineTool({
   approval: always(),
   async execute(input, ctx) {
     const access = authorizeTool(ctx, input, PERMISSIONS.INTERVIEW_WRITE, "A2");
-    if (input.endUtc <= input.startUtc) throw new Error("INVALID_TIME_RANGE");
+    const startUtc = new Date(input.startUtc);
+    const endUtc = new Date(input.endUtc);
+    if (endUtc <= startUtc) throw new Error("INVALID_TIME_RANGE");
     const interview = await readWithTenant(access, async (tx) => {
       const [row] = await tx
         .select({
@@ -51,15 +53,15 @@ export default defineTool({
       targetRefs: [`interview:${interview.id}`, `application:${interview.applicationId}`],
       parameters: {
         interviewId: interview.id,
-        startUtc: input.startUtc.toISOString(),
-        endUtc: input.endUtc.toISOString(),
+        startUtc: startUtc.toISOString(),
+        endUtc: endUtc.toISOString(),
       },
       rationale: input.rationale,
       evidenceRefs: [`interview:${interview.id}`],
       idempotencyKey: actionIdempotency(
         "propose_scheduling_resolution",
         access.sessionId,
-        `${interview.id}:${input.startUtc.toISOString()}`,
+        `${interview.id}:${startUtc.toISOString()}`,
       ),
     });
     return {

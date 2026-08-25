@@ -5,6 +5,7 @@ export default defineAgent({
   description:
     "Evidence-analysis specialist that compares recorded evidence to protocol requirements without ranking or deciding employment outcomes.",
   model: createOpenCodeGoModel(),
+  modelContextWindowTokens: 128000,
   reasoning: "low",
   limits: {
     sessionTimeoutMs: 15 * 60 * 1000,

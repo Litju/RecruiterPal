@@ -1,7 +1,15 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
-  "globalEnv": ["NODE_ENV", "DATABASE_URL", "OPENCODE_GO_API_KEY", "BETTER_AUTH_SECRET"],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "RP_APP_DATABASE_URL",
+    "OPENCODE_GO_API_KEY",
+    "OPENCODE_GO_BASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
