@@ -66,6 +66,9 @@ remain blocked; the remaining limitations are listed below.
 ## Agent
 
 - session create: PASS (server-side persisted Eve session boundary)
+- Better Auth production secret: PASS (rotated to a cryptographically random
+  high-entropy Vercel Production secret; demo login returned HTTP 200 after
+  redeployment)
 - continuation: PASS (contextual session and proposal persistence boundary)
 - streaming: PASS (server-side event stream contract; live Eve invocation completed with streamed session events)
 - typed tool call: PASS (13 bounded typed tools with organization, actor, permission, resource, authority, schema, and invariant checks)
@@ -115,7 +118,7 @@ remain blocked; the remaining limitations are listed below.
 ## Deployment
 
 - Vercel: PASS (authenticated CLI `58.9.4`; project `recruiterpal`; clean
-  production deployment `dpl_ioYDEVBbwfZjMrm7w7LrvKDzLee2` ready and aliased at
+  production deployment `dpl_6aL49AARXcK7a9MawiMXZoBrSuzL` ready and aliased at
   https://recruiterpal.vercel.app)
 - Neon: PASS (dedicated `recruiterpal` project `lucky-butterfly-64762550`; migrations, seed, restricted `rp_app` role, and hosted RLS probe qualified)
 - hosted smoke: PASS (`/login` 200, unauthenticated `/today` 307 to `/login`,
@@ -173,7 +176,7 @@ OPENCODE_GO=PASS_RAW_RESPONSES_EVE_TURN_AND_HOSTED_EVE_STREAM
 PLAYWRIGHT=PASS_LOCAL_CI_AND_HOSTED_INTERACTION_SMOKE
 PRE_PUSH=PASS_LEFTHOOK_QA_FAST_ON_F87FC43
 CI=PASS_RUN_32901023070
-VERCEL=PASS_PRODUCTION_DPL_IOYDEVBbwfZjMrm7w7LrvKDzLee2
+VERCEL=PASS_PRODUCTION_DPL_6aL49AARXcK7a9MawiMXZoBrSuzL
 NEON=PASS_LUCKY_BUTTERFLY_64762550
 SECURITY_RELEASE_GATE=BLOCKED_NEXT_16_3_3_LATEST_STABLE_NO_16_3_4_AS_OF_2026_08_25_BOUNDARY_2026_08_26
 SHIP_RECEIPT=PASS
