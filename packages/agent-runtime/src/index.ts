@@ -26,8 +26,16 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const AGENT_RUNTIME_VERSION = "0.2.0";
+const OPENCODE_GO_API_KEY_ENV = "OPENCODE_GO_API_KEY";
+const OPENCODE_GO_BASE_URL_ENV = "OPENCODE_GO_BASE_URL";
+const DEFAULT_OPENCODE_GO_ENDPOINT = "https://opencode.ai/zen/go/v1";
+
+function readServerEnv(name: string): string | undefined {
+  return process.env[name];
+}
+
 export const OPENCODE_GO_ENDPOINT =
-  process.env.OPENCODE_GO_BASE_URL ?? "https://opencode.ai/zen/go/v1";
+  readServerEnv(OPENCODE_GO_BASE_URL_ENV) ?? DEFAULT_OPENCODE_GO_ENDPOINT;
 export const OPENCODE_GO_PROTOCOL = "responses" as const;
 export const OPENCODE_GO_MODEL = "gpt-5.6-luna" as const;
 export const AGENT_PROMPT_VERSION = "recruiterpal-1.1.0";
@@ -42,7 +50,7 @@ export interface ProviderQualificationState {
 /** Does not disclose the secret; used by release qualification and health UI. */
 export function providerQualificationState(): ProviderQualificationState {
   return {
-    configured: Boolean(process.env.OPENCODE_GO_API_KEY),
+    configured: Boolean(readServerEnv(OPENCODE_GO_API_KEY_ENV)),
     endpoint: OPENCODE_GO_ENDPOINT,
     protocol: OPENCODE_GO_PROTOCOL,
     model: OPENCODE_GO_MODEL,
@@ -52,7 +60,7 @@ export function providerQualificationState(): ProviderQualificationState {
 /** Direct OpenCode Go Responses-compatible model. The key is server-only. */
 export function createOpenCodeGoModel() {
   const provider = createOpenAI({
-    apiKey: process.env.OPENCODE_GO_API_KEY,
+    apiKey: readServerEnv(OPENCODE_GO_API_KEY_ENV),
     baseURL: OPENCODE_GO_ENDPOINT,
     name: "opencode-go",
   });
