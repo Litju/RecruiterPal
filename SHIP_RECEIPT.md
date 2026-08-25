@@ -2,12 +2,14 @@
 
 ## Final status
 
-`PASS_PUBLIC_RELEASE_WITH_HOSTED_QUALIFICATION`
+`PASS_PUBLIC_RELEASE_WITH_SECURITY_GATE_BLOCKED`
 
-RecruiterPal is qualified through M9 for the local product and public-source
-release. Neon, Vercel, OpenCode Go, Eve, hosted smoke, and the patched Next.js
-release gate are qualified. Live Gmail and Google Calendar credentials remain
-blocked; the remaining limitations are listed below.
+RecruiterPal is qualified through M9 for the local product, public repository,
+and hosted release. Neon, Vercel, OpenCode Go, Eve, and hosted interaction
+smoke are qualified. The frozen August 26, 2026 Next.js security boundary is
+not yet reached as of August 25, 2026; Next.js 16.3.3 is the latest stable
+16.3.x release available today. Live Gmail and Google Calendar credentials
+remain blocked; the remaining limitations are listed below.
 
 ## Repository
 
@@ -15,10 +17,13 @@ blocked; the remaining limitations are listed below.
 - visibility: PUBLIC
 - branch: `main`
 - start SHA: `b5662f4f72a39eb7a8a5474c543ad690d57e3a60`
-- final product SHA: `114ac884b5e4883f4d8517d4bc96118f65d60a27`
+- final product SHA: `f87fc43a29c911fdecc44ec273de5e56b3375531`
 - receipt commit: documentation-only commit immediately after the final product SHA
 - PR: NOT_RUN (direct push to the requested `main` branch)
 - merge SHA: NOT_RUN (no pull request was used)
+- license: PASS — RecruiterPal Proprietary Source-Available License; GitHub
+  reports `Other`, with all rights reserved and no general commercial or
+  derivative-use grant. See [LICENSE](./LICENSE).
 
 ## Milestone commits
 
@@ -70,6 +75,9 @@ blocked; the remaining limitations are listed below.
 - OpenCode Go live smoke: PASS (Responses-compatible turn returned HTTP 200 from the configured endpoint/model)
 - Eve live model turn: PASS (real `eve invoke` completed through the server-side adapter)
 - Eve streaming/session path: PASS (completed invocation produced the expected session event stream)
+- hosted provider/session path: PASS (production demo login reached Today;
+  two live Eve sessions returned HTTP 202 and HTTP 200 streamed events after
+  the clean production deployment)
 
 ## Workflows
 
@@ -87,6 +95,10 @@ blocked; the remaining limitations are listed below.
 - approvals: PASS (approval-required state and consequential action boundary)
 - keyboard/accessibility: PASS (keyboard path, semantic controls, reduced-motion support, and accessible drawer/pane semantics)
 - Playwright: PASS (GitHub Actions golden flow 1/1; local golden flow 1/1)
+- hosted interaction smoke: PASS (authenticated Today rendered with an enabled
+  Ask RecruiterPal composer; two Inspect evidence and two Ask why controls were
+  enabled; Inspect evidence triggered a Pal turn; free-form submission cleared
+  and completed through the hosted Eve stream)
 
 ## Quality
 
@@ -97,14 +109,26 @@ blocked; the remaining limitations are listed below.
 - security/dependency scan: PASS (`pnpm audit --audit-level high`; no known vulnerabilities)
 - secret scan: PASS
 - pre-push: PASS (Lefthook `1.13.6`; mandatory `qa:fast` completed with Docker-backed PostgreSQL 18)
-- CI: PASS (GitHub Actions run `32887936078`; quality and e2e jobs passed)
+- CI: PASS (GitHub Actions run `32901023070`; quality and e2e jobs passed for
+  `f87fc43a29c911fdecc44ec273de5e56b3375531`)
 
 ## Deployment
 
-- Vercel: PASS (authenticated CLI `58.9.4`; project `recruiterpal`; production deployment `dpl_3EEDMLYLeGUem1EHhVk69uuePRLM` ready and aliased at https://recruiterpal.vercel.app)
+- Vercel: PASS (authenticated CLI `58.9.4`; project `recruiterpal`; clean
+  production deployment `dpl_ioYDEVBbwfZjMrm7w7LrvKDzLee2` ready and aliased at
+  https://recruiterpal.vercel.app)
 - Neon: PASS (dedicated `recruiterpal` project `lucky-butterfly-64762550`; migrations, seed, restricted `rp_app` role, and hosted RLS probe qualified)
-- hosted smoke: PASS (`/login` 200, unauthenticated `/today` 307 to `/login`, authenticated demo Today surface loaded from Neon, `/icon.svg` 200, zero browser console errors)
-- Next.js security gate: PASS (`next` and `eslint-config-next` upgraded to `16.3.3`; Vercel build log detected Next.js 16.3.3 and production smoke passed; see [Next.js release information](https://nextjs.org/blog) and [support policy](https://nextjs.org/support-policy))
+- hosted smoke: PASS (`/login` 200, unauthenticated `/today` 307 to `/login`,
+  authenticated demo Today surface loaded from Neon, `/icon.svg` 200, and
+  hosted Eve interaction completed). The browser also reported non-blocking
+  404 responses for protected navigation-link RSC prefetch requests; full
+  page routes are present in the production deployment and this is recorded
+  as a limitation below.
+- Next.js security gate: BLOCKED (`next` and `eslint-config-next` are on
+  `16.3.3`, the latest stable `16.3.x` available on August 25, 2026; no
+  `16.3.4` or later stable patch is available, and the frozen August 26, 2026
+  security boundary has not arrived). See [Next.js release information](https://nextjs.org/blog)
+  and [support policy](https://nextjs.org/support-policy).
 - live Gmail / Google Calendar: BLOCKED (live credentials absent; synthetic adapters and no-external-write behavior PASS)
 
 ## Known limitations
@@ -112,6 +136,11 @@ blocked; the remaining limitations are listed below.
 - Live Gmail and Google Calendar writes remain unqualified until provider credentials are supplied; synthetic fallbacks are explicit and non-delivering.
 - Lint is green with a small set of non-blocking existing warnings; no lint errors remain.
 - GitHub Actions reports non-blocking Node.js 20 deprecation annotations from `pnpm/action-setup@v4`; jobs still pass on the hosted runner.
+- Next.js security release gate remains blocked until the frozen August 26,
+  2026 boundary is satisfied by an actually available supported patch.
+- Hosted Next.js navigation emits non-blocking RSC prefetch 404 responses for
+  protected sidebar links; direct production pages are built, and this did
+  not block authenticated Today or Eve interaction qualification.
 
 ## Integrity statement
 
@@ -122,9 +151,9 @@ successfully.
 
 ## Machine-readable release receipt
 
-RECRUITERPAL_STATUS=PASS_PUBLIC_RELEASE_WITH_HOSTED_QUALIFICATION
+RECRUITERPAL_STATUS=PASS_PUBLIC_RELEASE_WITH_SECURITY_GATE_BLOCKED
 PUBLIC_REPO=https://github.com/Litju/RecruiterPal
-FINAL_SHA=114ac884b5e4883f4d8517d4bc96118f65d60a27
+FINAL_SHA=f87fc43a29c911fdecc44ec273de5e56b3375531
 WORKTREE_CLEAN=PASS
 M0=PASS
 M1=PASS
@@ -140,11 +169,11 @@ DOMAIN_TESTS=PASS
 DB_RLS_TESTS=PASS_LOCAL_17_OF_17_PLUS_NEON_FAIL_CLOSED
 WORKFLOW_TESTS=PASS
 EVE_EVALS=PASS_9_OF_9
-OPENCODE_GO=PASS_RAW_RESPONSES_AND_EVE_TURN
-PLAYWRIGHT=PASS_HOSTED_DEMO_AND_CI_GOLDEN_FLOW
-PRE_PUSH=PASS_LEFTHOOK_QA_FAST
-CI=PASS_RUN_32887936078
-VERCEL=PASS_PRODUCTION_DPL_3EEDMLYLEGUEM1EHHVK69UUEPRLM
+OPENCODE_GO=PASS_RAW_RESPONSES_EVE_TURN_AND_HOSTED_EVE_STREAM
+PLAYWRIGHT=PASS_LOCAL_CI_AND_HOSTED_INTERACTION_SMOKE
+PRE_PUSH=PASS_LEFTHOOK_QA_FAST_ON_F87FC43
+CI=PASS_RUN_32901023070
+VERCEL=PASS_PRODUCTION_DPL_IOYDEVBbwfZjMrm7w7LrvKDzLee2
 NEON=PASS_LUCKY_BUTTERFLY_64762550
-SECURITY_RELEASE_GATE=PASS_NEXT_16_3_3
+SECURITY_RELEASE_GATE=BLOCKED_NEXT_16_3_3_LATEST_STABLE_NO_16_3_4_AS_OF_2026_08_25_BOUNDARY_2026_08_26
 SHIP_RECEIPT=PASS
