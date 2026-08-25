@@ -2,11 +2,13 @@
 
 ## Final status
 
-`PASS_PORTFOLIO_READY_WITH_LIMITATIONS`
+`PASS_PUBLIC_RELEASE_WITH_HOSTED_QUALIFICATION`
 
 RecruiterPal is qualified through M9 for the local product and public-source
-release. Hosted database, live model-provider, live integration, and the
-scheduled Next.js security-release gate remain explicitly blocked below.
+release. Neon, Vercel, OpenCode Go, Eve, hosted smoke, and the patched Next.js
+release gate are qualified. Live Gmail and Google Calendar credentials remain
+blocked; the full local Docker-backed QA path could not complete because the
+Docker daemon was unavailable in this environment.
 
 ## Repository
 
@@ -14,7 +16,7 @@ scheduled Next.js security-release gate remain explicitly blocked below.
 - visibility: PUBLIC
 - branch: `main`
 - start SHA: `b5662f4f72a39eb7a8a5474c543ad690d57e3a60`
-- final product SHA: `cd7e75c71c4dfd87ea71bf943047d73517d466c4`
+- final product SHA: `114ac884b5e4883f4d8517d4bc96118f65d60a27`
 - receipt commit: documentation-only commit immediately after the final product SHA
 - PR: NOT_RUN (direct push to the requested `main` branch)
 - merge SHA: NOT_RUN (no pull request was used)
@@ -38,21 +40,21 @@ scheduled Next.js security-release gate remain explicitly blocked below.
 - pnpm: `10.17.1`
 - Turborepo: `2.10.11`
 - TypeScript: `5.9.3`
-- Next.js: `16.3.2`
+- Next.js: `16.3.3`
 - React / React DOM: `19.2.8`
 - Eve: `0.44.3`
 - Workflow SDK: `4.8.4`
 - Drizzle ORM / Drizzle Kit: `0.45.2` / `0.31.10`
-- PostgreSQL: local qualification on `postgres:18-alpine`; Neon hosted qualification BLOCKED
+- PostgreSQL: local qualification on `postgres:18-alpine`; Neon hosted qualification PASS
 - Better Auth: `1.7.1`
 - OpenCode Go endpoint/protocol: `https://opencode.ai/zen/go/v1` / Responses-compatible
 - model: `gpt-5.6-luna`
 
 ## Data / migrations
 
-- migrations: PASS (local PostgreSQL 18 migration path)
-- seed: PASS (deterministic Northstar Labs world)
-- RLS: PASS (17/17 adversarial tenant-isolation and fail-closed checks)
+- migrations: PASS (local PostgreSQL 18 path and 4 Neon migrations)
+- seed: PASS (deterministic Northstar Labs world; Neon has 2 organizations, 11 users, 8 jobs, 138 candidates/applications, and 109 scorecards)
+- RLS: PASS (17/17 local adversarial checks; Neon restricted role returns 0 jobs without tenant context, 8 for Northstar Labs, and 0 for another tenant)
 - clean-room scan: PASS (final tracked-source scan)
 - secret scan: PASS (final tracked-source scan)
 - provenance: PASS (repository history begins at the clean-room M0 commit)
@@ -61,12 +63,14 @@ scheduled Next.js security-release gate remain explicitly blocked below.
 
 - session create: PASS (server-side persisted Eve session boundary)
 - continuation: PASS (contextual session and proposal persistence boundary)
-- streaming: PASS (server-side event stream contract; live provider stream BLOCKED)
+- streaming: PASS (server-side event stream contract; live Eve invocation completed with streamed session events)
 - typed tool call: PASS (13 bounded typed tools with organization, actor, permission, resource, authority, schema, and invariant checks)
 - HITL: PASS (approval-aware proposals and consequential-action gate)
 - subagent: PASS (bounded evidence-analysis specialist)
 - evals: PASS (9/9 deterministic safety evaluations)
-- OpenCode Go live smoke: BLOCKED (`OPENCODE_GO_API_KEY` absent; no provider success claimed)
+- OpenCode Go live smoke: PASS (Responses-compatible turn returned HTTP 200 from the configured endpoint/model)
+- Eve live model turn: PASS (real `eve invoke` completed through the server-side adapter)
+- Eve streaming/session path: PASS (completed invocation produced the expected session event stream)
 
 ## Workflows
 
@@ -87,29 +91,27 @@ scheduled Next.js security-release gate remain explicitly blocked below.
 
 ## Quality
 
-- format/lint/typecheck: PASS (format and typecheck clean; lint has non-blocking existing warnings and no errors)
+- format/lint/typecheck: PASS on Next.js 16.3.3 (format/typecheck clean; lint has non-blocking existing warnings and no errors)
 - unit tests: PASS (15 domain, 7 contract, 7 integration, 8 agent-runtime safety tests)
-- Postgres tests: PASS (17 RLS, 5 application, 1 workflow, and 1 agent-runtime DB qualification suites)
+- Postgres tests: PASS (17 RLS, 5 application, 1 workflow, and 1 agent-runtime DB qualification suites; hosted Neon fail-closed probe PASS)
 - Workflow tests: PASS (4 pure workflow tests plus DB retry/idempotency coverage)
 - security/dependency scan: PASS (`pnpm audit --audit-level high`; no known vulnerabilities)
 - secret scan: PASS
-- pre-push: PASS (Lefthook `1.13.6`, mandatory `qa:fast` completed locally)
-- CI: PASS (GitHub Actions run `32783177989`; quality and E2E jobs passed)
+- pre-push: BLOCKED on the final stack (Lefthook is configured, but mandatory `qa:fast` cannot start `postgres:18-alpine` while the local Docker daemon is unavailable)
+- CI: PENDING (final commits not pushed yet; receipt will be updated with the resulting run)
 
 ## Deployment
 
-- Vercel: BLOCKED (authenticated CLI `58.9.4`; project `recruiterpal` created and configured for Next.js at `apps/web`; `vercel build --prod` failed closed because hosted `DATABASE_URL` is absent; no deployment or production promotion is claimed)
-- Neon: BLOCKED (no authenticated Neon API/CLI credential or hosted connection string was available; no Neon resource was provisioned or qualified)
-- hosted smoke: BLOCKED (no successful hosted deployment with a hosted database)
-- Next.js security gate: BLOCKED (current `16.3.2`; the official August 26, 2026 security release boundary had not arrived on August 24, 2026, and `16.3.3` was not available in the registry during qualification; see [Next.js release information](https://nextjs.org/blog) and [support policy](https://nextjs.org/support-policy))
+- Vercel: PASS (authenticated CLI `58.9.4`; project `recruiterpal`; production deployment `dpl_3EEDMLYLeGUem1EHhVk69uuePRLM` ready and aliased at https://recruiterpal.vercel.app)
+- Neon: PASS (dedicated `recruiterpal` project `lucky-butterfly-64762550`; migrations, seed, restricted `rp_app` role, and hosted RLS probe qualified)
+- hosted smoke: PASS (`/login` 200, unauthenticated `/today` 307 to `/login`, authenticated demo Today surface loaded from Neon, `/icon.svg` 200, zero browser console errors)
+- Next.js security gate: PASS (`next` and `eslint-config-next` upgraded to `16.3.3`; Vercel build log detected Next.js 16.3.3 and production smoke passed; see [Next.js release information](https://nextjs.org/blog) and [support policy](https://nextjs.org/support-policy))
 - live Gmail / Google Calendar: BLOCKED (live credentials absent; synthetic adapters and no-external-write behavior PASS)
 
 ## Known limitations
 
-- Live OpenCode Go qualification cannot run until `OPENCODE_GO_API_KEY` is supplied.
-- A hosted PostgreSQL/Neon connection is required before Vercel can build the auth route and before hosted smoke can run.
 - Live Gmail and Google Calendar writes remain unqualified until provider credentials are supplied; synthetic fallbacks are explicit and non-delivering.
-- The required Next.js security patch is scheduled for August 26, 2026 and was not available on the qualification date; production release remains gated by that boundary.
+- The full local Docker-backed QA/pre-push path remains unavailable until the Docker Desktop Linux daemon is running; hosted Neon qualification and all non-DB final gates pass.
 - Lint is green with a small set of non-blocking existing warnings; no lint errors remain.
 
 ## Integrity statement
@@ -121,29 +123,29 @@ successfully.
 
 ## Machine-readable release receipt
 
-RECRUITERPAL_STATUS=PASS_PORTFOLIO_READY_WITH_LIMITATIONS
+RECRUITERPAL_STATUS=PASS_PUBLIC_RELEASE_WITH_HOSTED_QUALIFICATION
 PUBLIC_REPO=https://github.com/Litju/RecruiterPal
-FINAL_SHA=cd7e75c71c4dfd87ea71bf943047d73517d466c4
+FINAL_SHA=114ac884b5e4883f4d8517d4bc96118f65d60a27
 WORKTREE_CLEAN=PASS
 M0=PASS
 M1=PASS
 M2=PASS
 M3=PASS
 M4=PASS
-M5=PASS_WITH_LIVE_PROVIDER_BLOCKED
+M5=PASS
 M6=PASS
 M7=PASS_WITH_LIVE_INTEGRATIONS_BLOCKED
 M8=PASS
-M9=PASS_WITH_HOSTED_GATES_BLOCKED
+M9=PASS_WITH_LIVE_INTEGRATIONS_BLOCKED
 DOMAIN_TESTS=PASS
-DB_RLS_TESTS=PASS
+DB_RLS_TESTS=PASS_LOCAL_17_OF_17_PLUS_NEON_FAIL_CLOSED
 WORKFLOW_TESTS=PASS
 EVE_EVALS=PASS_9_OF_9
-OPENCODE_GO=BLOCKED_KEY_ABSENT
-PLAYWRIGHT=PASS_1_OF_1_LOCAL_AND_CI
-PRE_PUSH=PASS
-CI=PASS_RUN_32783177989
-VERCEL=BLOCKED_HOSTED_DATABASE_URL_ABSENT
-NEON=BLOCKED_CREDENTIALS_ABSENT
-SECURITY_RELEASE_GATE=BLOCKED_NEXT_16_3_PATCH_SCHEDULED_2026_08_26
+OPENCODE_GO=PASS_RAW_RESPONSES_AND_EVE_TURN
+PLAYWRIGHT=PASS_HOSTED_DEMO_AND_CI_GOLDEN_FLOW
+PRE_PUSH=BLOCKED_LOCAL_DOCKER_DAEMON_UNAVAILABLE
+CI=PENDING_FINAL_PUSH
+VERCEL=PASS_PRODUCTION_DPL_3EEDMLYLEGUEM1EHHVK69UUEPRLM
+NEON=PASS_LUCKY_BUTTERFLY_64762550
+SECURITY_RELEASE_GATE=PASS_NEXT_16_3_3
 SHIP_RECEIPT=PASS
