@@ -35,4 +35,8 @@ if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
 const resolvedTargetOutputDirectory = resolve(process.cwd(), targetOutputDirectory);
 mkdirSync(dirname(resolvedTargetOutputDirectory), { recursive: true });
 rmSync(resolvedTargetOutputDirectory, { force: true, recursive: true });
-cpSync(stagedOutputDirectory, resolvedTargetOutputDirectory, { force: true, recursive: true });
+cpSync(stagedOutputDirectory, resolvedTargetOutputDirectory, {
+  dereference: true,
+  force: true,
+  recursive: true,
+});
