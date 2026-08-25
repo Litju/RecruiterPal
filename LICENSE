@@ -1,21 +1,33 @@
-MIT License
+RecruiterPal Proprietary Source-Available License
+Copyright Julio Rodriguez 2026
+All rights reserved.
 
-Copyright (c) 2026 RecruiterPal contributors
+This license governs the RecruiterPal source made available in this
+repository (the “Software”). The Software is source-available and is not
+licensed as open-source software. No general permission is granted to use,
+copy, modify, adapt, merge, publish, distribute, sublicense, sell, host,
+commercialize, or create derivative works from the Software, in source or
+compiled form, except as expressly permitted below or by a separate written
+license signed by Julio Rodriguez.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+You may view the source and make local, private copies solely for evaluation,
+security review, and understanding of the Software. You may not operate,
+provide, expose, or commercialize the Software or a derivative without prior
+written permission from Julio Rodriguez.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+GitHub Terms carve-out: nothing in this license is intended to restrict the
+rights that GitHub’s Terms of Service grant to GitHub or to users as necessary
+to view, fork, cache, transmit, or display repository content through GitHub’s
+ordinary repository features. That carve-out grants no independent general
+right to use the Software outside those GitHub features.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY LAW. JULIO
+RODRIGUEZ SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY
+ARISING FROM THE SOFTWARE OR ITS USE.
+
+This license does not grant trademark rights. RecruiterPal names, logos,
+marks, and branding remain subject to `TRADEMARKS.md`.
+
+This license is intended to be legally restrictive. Obtain independent legal
+counsel before relying on it for a distribution or commercial arrangement.

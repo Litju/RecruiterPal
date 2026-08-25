@@ -212,4 +212,4 @@ known limitations in [SHIP_RECEIPT.md](./SHIP_RECEIPT.md).
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+RecruiterPal Proprietary Source-Available License — see [LICENSE](./LICENSE).

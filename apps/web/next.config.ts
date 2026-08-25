@@ -8,4 +8,5 @@ const nextConfig: NextConfig = {
 
 export default withEve(withWorkflow(nextConfig), {
   eveRoot: "../../agent",
+  eveBuildCommand: "node ../scripts/eve-vercel-build.mjs",
 });
