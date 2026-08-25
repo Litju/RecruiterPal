@@ -1,7 +1,26 @@
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, rmSync } from "node:fs";
+import { copyFileSync, lstatSync, mkdirSync, readdirSync, realpathSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+
+function copyTreeWithoutLinks(source, target) {
+  const stats = lstatSync(source);
+  if (stats.isSymbolicLink()) {
+    copyTreeWithoutLinks(realpathSync(source), target);
+    return;
+  }
+
+  if (stats.isDirectory()) {
+    mkdirSync(target, { recursive: true });
+    for (const entry of readdirSync(source)) {
+      copyTreeWithoutLinks(resolve(source, entry), resolve(target, entry));
+    }
+    return;
+  }
+
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(source, target);
+}
 
 const scriptRoot = dirname(fileURLToPath(import.meta.url));
 const eveCli = resolve(scriptRoot, "../node_modules/eve/bin/eve.js");
@@ -35,8 +54,4 @@ if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
 const resolvedTargetOutputDirectory = resolve(process.cwd(), targetOutputDirectory);
 mkdirSync(dirname(resolvedTargetOutputDirectory), { recursive: true });
 rmSync(resolvedTargetOutputDirectory, { force: true, recursive: true });
-cpSync(stagedOutputDirectory, resolvedTargetOutputDirectory, {
-  dereference: true,
-  force: true,
-  recursive: true,
-});
+copyTreeWithoutLinks(stagedOutputDirectory, resolvedTargetOutputDirectory);
