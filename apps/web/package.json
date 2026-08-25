@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.46",
-    "@recruiterpal/application": "workspace:*",
     "@recruiterpal/agent-runtime": "workspace:*",
+    "@recruiterpal/application": "workspace:*",
     "@recruiterpal/auth": "workspace:*",
     "@recruiterpal/contracts": "workspace:*",
     "@recruiterpal/db": "workspace:*",
@@ -21,27 +21,27 @@
     "@recruiterpal/observability": "workspace:*",
     "@recruiterpal/ui": "workspace:*",
     "@recruiterpal/workflows": "workspace:*",
+    "better-auth": "^1.7.1",
+    "drizzle-orm": "^0.45.2",
     "eve": "0.44.3",
+    "lucide-react": "^0.545.0",
     "motion": "^13.1.1",
-    "next": "16.3.2",
+    "next": "16.3.3",
+    "pg": "^8.16.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "workflow": "^4.8.4",
-    "zod": "^4.1.5",
-    "drizzle-orm": "^0.45.2",
-    "pg": "^8.16.3",
-    "lucide-react": "^0.545.0",
-    "better-auth": "^1.7.1"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@recruiterpal/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.3.1",
+    "@types/pg": "^8.15.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "eslint-config-next": "16.3.3",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.9.3",
-    "eslint-config-next": "16.3.2",
-    "@types/pg": "^8.15.5",
-    "@tailwindcss/postcss": "^4.3.3"
+    "typescript": "5.9.3"
   }
 }
