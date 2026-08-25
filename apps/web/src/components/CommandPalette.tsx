@@ -4,8 +4,16 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command, Search } from "lucide-react";
+import { requestPalPrompt } from "@/components/pal-events";
 
-const COMMANDS = [
+type CommandItem = {
+  label: string;
+  detail: string;
+  href: string;
+  prompt?: string;
+};
+
+const COMMANDS: readonly CommandItem[] = [
   { label: "Open Today", detail: "Execution surface", href: "/today" },
   { label: "Open pipeline", detail: "Inspect stage flow", href: "/pipeline" },
   {
@@ -25,7 +33,7 @@ const COMMANDS = [
   },
   { label: "Open candidate workspace", detail: "Evidence and scorecards", href: "/candidates" },
   { label: "View execution timeline", detail: "Append-only audit ledger", href: "/activity" },
-] as const;
+];
 
 export function CommandPalette() {
   const router = useRouter();
@@ -34,13 +42,23 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
-  const filtered = useMemo(
-    () =>
-      COMMANDS.filter((command) =>
-        `${command.label} ${command.detail}`.toLowerCase().includes(query.toLowerCase()),
-      ),
-    [query],
-  );
+  const filtered = useMemo<CommandItem[]>(() => {
+    const matching = COMMANDS.filter((command) =>
+      `${command.label} ${command.detail}`.toLowerCase().includes(query.toLowerCase()),
+    );
+    const trimmed = query.trim();
+    return trimmed
+      ? [
+          {
+            label: `Ask RecruiterPal: ${trimmed}`,
+            detail: "Open contextual agent",
+            href: "/today",
+            prompt: trimmed,
+          },
+          ...matching,
+        ]
+      : matching;
+  }, [query]);
   const openPalette = useCallback(() => {
     setQuery("");
     setSelected(0);
@@ -64,9 +82,17 @@ export function CommandPalette() {
   }, [open]);
 
   const close = () => setOpen(false);
-  const run = (href: string) => {
+  const run = (command: CommandItem) => {
     close();
-    router.push(href);
+    if (command.prompt) {
+      if (window.location.pathname === "/today") {
+        requestPalPrompt({ prompt: command.prompt });
+      } else {
+        router.push(`/today?pal=${encodeURIComponent(command.prompt)}`);
+      }
+      return;
+    }
+    router.push(command.href);
   };
 
   return (
@@ -116,7 +142,7 @@ export function CommandPalette() {
                     filtered.length === 0 ? 0 : (current - 1 + filtered.length) % filtered.length,
                   );
                 }
-                if (event.key === "Enter" && filtered[selected]) run(filtered[selected].href);
+                if (event.key === "Enter" && filtered[selected]) run(filtered[selected]);
               }}
             >
               <div className="flex items-center gap-2 border-b border-border-subtle px-4">
@@ -128,7 +154,7 @@ export function CommandPalette() {
                     setQuery(event.target.value);
                     setSelected(0);
                   }}
-                  placeholder="Navigate or ask Pal to prepare a safe action…"
+                  placeholder="Navigate or ask RecruiterPal to prepare a safe action…"
                   className="h-12 min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-text-tertiary"
                   aria-label="Search commands"
                 />
@@ -145,11 +171,15 @@ export function CommandPalette() {
                 ) : (
                   <ul role="listbox" aria-label="Commands" className="space-y-0.5">
                     {filtered.map((command, index) => (
-                      <li key={command.href} role="option" aria-selected={index === selected}>
+                      <li
+                        key={`${command.href}-${command.prompt ?? command.label}`}
+                        role="option"
+                        aria-selected={index === selected}
+                      >
                         <button
                           type="button"
                           onMouseEnter={() => setSelected(index)}
-                          onClick={() => run(command.href)}
+                          onClick={() => run(command)}
                           className={`flex w-full items-center justify-between gap-4 rounded-control px-3 py-2 text-left ${index === selected ? "bg-pal-subtle" : "hover:bg-surface-2"}`}
                         >
                           <span className="min-w-0">

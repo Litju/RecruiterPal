@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
+import { useEveAgent, type EveMessage } from "eve/react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowUpRight, Bot, ShieldCheck } from "lucide-react";
 import { LifecycleBadge } from "@/components/LifecycleBadge";
+import {
+  PAL_PROMPT_EVENT,
+  type PalPromptContext,
+  type PalPromptDetail,
+} from "@/components/pal-events";
 
 export interface PalPaneActivity {
   id: string;
@@ -28,6 +34,8 @@ export interface PalPaneProps {
   activeWorkflows: number;
   automatedActivity: PalPaneActivity[];
   intent?: string;
+  initialPrompt?: string;
+  initialPromptContext?: PalPromptContext;
 }
 
 const INTENT_COPY: Record<string, string> = {
@@ -42,12 +50,97 @@ const INTENT_COPY: Record<string, string> = {
 export function PalPane(props: PalPaneProps) {
   const reducedMotion = useReducedMotion();
   const [showTimeline, setShowTimeline] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
+  const [draft, setDraft] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const initialPromptSent = useRef<string | null>(null);
+  const agent = useEveAgent();
+  const busy = agent.status === "submitted" || agent.status === "streaming";
   const intentCopy = props.intent ? INTENT_COPY[props.intent] : undefined;
-  const lifecycle = props.provider.configured ? "waiting" : "blocked";
+  const lifecycle = !props.provider.configured
+    ? "blocked"
+    : agent.status === "error"
+      ? "failed"
+      : busy
+        ? "executing"
+        : "waiting";
+
+  const sendPrompt = useCallback(
+    async (prompt: string, context?: PalPromptDetail["context"]) => {
+      const message = prompt.trim();
+      if (!message || !props.provider.configured) return;
+      setChatOpen(true);
+      setLocalError(null);
+      try {
+        await agent.send(message, {
+          clientContext: {
+            surface: "today",
+            contextLabel: props.contextLabel,
+            selectedEntity: context ? JSON.stringify(context) : "none",
+            portfolioSignals: {
+              activeExceptions: props.activeExceptions,
+              criticalExceptions: props.criticalExceptions,
+              deadlineCount: props.deadlineCount,
+              pendingObligations: props.pendingObligations,
+              overdueObligations: props.overdueObligations,
+              readinessReady: props.readinessReady,
+              readinessReview: props.readinessReview,
+              activeWorkflows: props.activeWorkflows,
+            },
+          },
+        });
+      } catch (error) {
+        setLocalError(error instanceof Error ? error.message : "RecruiterPal could not answer.");
+      }
+    },
+    [
+      agent,
+      props.activeExceptions,
+      props.activeWorkflows,
+      props.contextLabel,
+      props.criticalExceptions,
+      props.deadlineCount,
+      props.overdueObligations,
+      props.pendingObligations,
+      props.provider.configured,
+      props.readinessReady,
+      props.readinessReview,
+    ],
+  );
+
+  useEffect(() => {
+    const onPrompt = (event: Event) => {
+      const detail = (event as CustomEvent<PalPromptDetail>).detail;
+      if (detail?.prompt) void sendPrompt(detail.prompt, detail.context);
+    };
+    window.addEventListener(PAL_PROMPT_EVENT, onPrompt);
+    return () => window.removeEventListener(PAL_PROMPT_EVENT, onPrompt);
+  }, [sendPrompt]);
+
+  useEffect(() => {
+    if (!props.initialPrompt || initialPromptSent.current === props.initialPrompt) return;
+    initialPromptSent.current = props.initialPrompt;
+    void sendPrompt(props.initialPrompt, props.initialPromptContext);
+  }, [props.initialPrompt, props.initialPromptContext, sendPrompt]);
+
+  const submitDraft = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const message = draft.trim();
+    if (!message || busy) return;
+    setDraft("");
+    void sendPrompt(message);
+  };
+
+  const messageText = (message: EveMessage) =>
+    message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("")
+      .trim();
 
   return (
     <motion.aside
-      aria-label="Pal contextual execution pane"
+      aria-label="RecruiterPal contextual execution pane"
       initial={{ opacity: 0, x: reducedMotion ? 0 : 10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.2 }}
@@ -59,7 +152,7 @@ export function PalPane(props: PalPaneProps) {
             <Bot className="size-4" aria-hidden />
           </span>
           <div>
-            <p className="text-[14px] font-semibold">Pal</p>
+            <p className="text-[14px] font-semibold">RecruiterPal</p>
             <p className="text-[11px] text-text-secondary">Execution partner</p>
           </div>
         </div>
@@ -72,8 +165,8 @@ export function PalPane(props: PalPaneProps) {
         </p>
         <p className="mt-1 text-[13px] font-medium">{props.contextLabel}</p>
         <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
-          Pal is grounded in this organization, its permissions, current work, evidence, and durable
-          workflow state.
+          RecruiterPal is grounded in this organization, its permissions, current work, evidence,
+          and durable workflow state.
         </p>
       </div>
 
@@ -91,7 +184,10 @@ export function PalPane(props: PalPaneProps) {
         </AnimatePresence>
       ) : null}
 
-      <dl className="mt-4 grid grid-cols-2 gap-2" aria-label="Pal execution context counts">
+      <dl
+        className="mt-4 grid grid-cols-2 gap-2"
+        aria-label="RecruiterPal execution context counts"
+      >
         <div className="rounded-card border border-border-subtle p-2.5">
           <dt className="text-[10px] uppercase tracking-wide text-text-tertiary">
             Needs attention
@@ -173,12 +269,119 @@ export function PalPane(props: PalPaneProps) {
       </div>
 
       <div className="mt-4 border-t border-border-subtle pt-3">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
+              Ask RecruiterPal
+            </p>
+            <p className="mt-1 text-[11px] text-text-tertiary">
+              Ask about the current portfolio, exception, evidence, or safe next step.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setChatOpen((value) => !value)}
+            className="rounded-control border border-border-subtle px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-2"
+            aria-expanded={chatOpen}
+          >
+            {chatOpen ? "Hide" : "Open"}
+          </button>
+        </div>
+
+        {chatOpen ? (
+          <>
+            <div
+              aria-live="polite"
+              className="mt-3 max-h-56 space-y-2 overflow-y-auto rounded-card border border-border-subtle bg-surface-2 p-2.5"
+            >
+              {agent.data.messages.length === 0 ? (
+                <p className="text-[12px] leading-relaxed text-text-secondary">
+                  Start with a question. RecruiterPal will explain the evidence and keep
+                  consequential decisions with you.
+                </p>
+              ) : (
+                agent.data.messages.map((message) => {
+                  const text = messageText(message);
+                  if (!text) return null;
+                  return (
+                    <div
+                      key={message.id}
+                      className={`rounded-control px-2.5 py-2 text-[12px] leading-relaxed ${message.role === "assistant" ? "bg-pal-subtle text-text-primary" : "bg-surface-1 text-text-secondary"}`}
+                    >
+                      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary">
+                        {message.role === "assistant" ? "RecruiterPal" : "You"}
+                      </p>
+                      <p className="whitespace-pre-wrap">{text}</p>
+                    </div>
+                  );
+                })
+              )}
+              {busy ? <p className="text-[11px] text-pal-text">RecruiterPal is working…</p> : null}
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {[
+                "Why is this blocked?",
+                "Inspect the evidence",
+                "What is the safest next step?",
+              ].map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  disabled={!props.provider.configured || busy}
+                  onClick={() => void sendPrompt(prompt)}
+                  className="rounded-control border border-pal/25 px-2 py-1 text-[11px] text-pal-text transition-colors hover:bg-pal-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+
+            <form className="mt-2 flex items-end gap-2" onSubmit={submitDraft}>
+              <textarea
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                rows={2}
+                disabled={!props.provider.configured || busy}
+                placeholder={
+                  props.provider.configured
+                    ? "Ask RecruiterPal anything about this work…"
+                    : "RecruiterPal is unavailable until the server provider is configured."
+                }
+                className="min-h-12 min-w-0 flex-1 resize-none rounded-control border border-border-strong bg-surface-1 px-2.5 py-2 text-[12px] outline-none placeholder:text-text-tertiary focus:border-pal disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Ask RecruiterPal"
+              />
+              <button
+                type="submit"
+                disabled={!props.provider.configured || busy || draft.trim().length === 0}
+                className="h-9 rounded-control bg-pal-strong px-3 text-[12px] font-medium text-white transition-colors hover:bg-pal disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Send
+              </button>
+            </form>
+            <p className="mt-1 text-[10px] text-text-tertiary">Ctrl/Cmd + Enter to send</p>
+            {localError || agent.error ? (
+              <p role="alert" className="mt-2 text-[11px] text-danger">
+                {localError ?? "RecruiterPal could not complete that request. Try again."}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+      </div>
+
+      <div className="mt-4 border-t border-border-subtle pt-3">
         <button
           type="button"
           onClick={() => setShowTimeline((value) => !value)}
           className="flex w-full items-center justify-between text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-secondary"
         >
-          <span>Pal-completed work</span>
+          <span>RecruiterPal-completed work</span>
           <span aria-hidden>{showTimeline ? "−" : "+"}</span>
         </button>
         {showTimeline ? (

@@ -14,7 +14,7 @@ const inputSchema = baseToolInput.extend({
 
 export default defineTool({
   description:
-    "Request an idempotent scorecard reminder for an overdue or due-soon scorecard. The workflow sends it; Pal does not impersonate a person.",
+    "Request an idempotent scorecard reminder for an overdue or due-soon scorecard. The workflow sends it; RecruiterPal does not impersonate a person.",
   inputSchema,
   outputSchema: proposalOutput,
   async execute(input, ctx) {

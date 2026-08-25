@@ -106,7 +106,8 @@ export default async function SettingsPage() {
             </p>
             <p>
               <strong className="text-text-primary">A3 human-only:</strong> reject, hire,
-              compensation, protocol changes. Pal cannot execute these under any configuration.
+              compensation, protocol changes. RecruiterPal cannot execute these under any
+              configuration.
             </p>
           </div>
         </section>

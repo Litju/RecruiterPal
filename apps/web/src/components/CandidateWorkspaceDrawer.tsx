@@ -245,10 +245,11 @@ export function CandidateWorkspaceDrawer({ rows }: { rows: CandidateListRow[] })
                           </p>
                         </div>
                         <Link
-                          href={`/today?intent=readiness-review&candidate=${data.candidate.id}`}
+                          href={`/today?intent=readiness-review&candidate=${data.candidate.id}&pal=candidate-readiness`}
                           className="inline-flex items-center gap-1.5 rounded-control bg-pal-strong px-3 py-2 text-[12px] font-medium text-white hover:bg-pal"
                         >
-                          Ask Pal to explain <ArrowUpRight className="size-3.5" aria-hidden />
+                          Ask RecruiterPal to explain{" "}
+                          <ArrowUpRight className="size-3.5" aria-hidden />
                         </Link>
                       </div>
                       <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -409,8 +410,8 @@ export function CandidateWorkspaceDrawer({ rows }: { rows: CandidateListRow[] })
                         <div>
                           <h3 className="text-[14px] font-semibold">Scorecard comparison</h3>
                           <p className="mt-1 text-[12px] text-text-secondary">
-                            Side-by-side ratings make disagreement visible; Pal cannot resolve it by
-                            itself.
+                            Side-by-side ratings make disagreement visible; RecruiterPal cannot
+                            resolve it by itself.
                           </p>
                         </div>
                         <span className="text-[11px] tabular text-text-tertiary">

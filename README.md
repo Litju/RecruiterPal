@@ -1,13 +1,13 @@
 # RecruiterPal
 
-**The evidence-centered recruiting operating system, powered by Pal.**
+**The evidence-centered recruiting operating environment, powered by RecruiterPal.**
 
 RecruiterPal gives recruiting teams one execution surface for the work that
 usually disappears between an ATS, email, calendars, spreadsheets, and human
 memory. It turns hiring protocols, candidate evidence, scorecards, deadlines,
 approvals, and operational risk into a living recruiting portfolio.
 
-Pal is RecruiterPal's bounded execution agent. Pal understands the current
+RecruiterPal is the bounded execution agent. It understands the current
 organization, job, candidate, application, workflow, evidence, permissions,
 and deadlines. It surfaces what matters, explains why it matters, prepares
 safe administrative work, and asks for human approval whenever a consequential
@@ -26,7 +26,7 @@ quiet, evidence-first, and designed around action rather than a chat bubble.
 
 Today opens with the portfolio state a recruiter needs right now: critical
 deadlines, blocked processes, overdue scorecards, pipeline signals, decision
-readiness, and work Pal has safely completed.
+readiness, and work RecruiterPal has safely completed.
 
 ![RecruiterPal Today execution surface](docs/screenshots/today.png)
 
@@ -43,7 +43,7 @@ timeline without restating the current portfolio context.
 
 The candidate workspace keeps protocol context, decision readiness, evidence
 observations, scorecard comparison, and execution history together. It does
-not produce a hidden fit score or let Pal make the hiring call.
+not produce a hidden fit score or let RecruiterPal make the hiring call.
 
 ![RecruiterPal candidate workspace](docs/screenshots/candidate-workspace.png)
 
@@ -55,20 +55,20 @@ not produce a hidden fit score or let Pal make the hiring call.
 - **Keeps evidence attached to judgment.** Versioned hiring protocols,
   structured observations, source provenance, scorecards, conflicts, and
   readiness snapshots make the reasoning inspectable.
-- **Lets Pal do the coordination.** Pal can read portfolio state, explain
+- **Lets RecruiterPal do the coordination.** RecruiterPal can read portfolio state, explain
   evidence, request reminders, prepare debriefs, draft communications, and
   propose safe next steps through bounded typed tools.
 - **Makes workflows durable.** Scorecard chase, candidate follow-up,
   scheduling resolution, interviewer replacement, reconciliation, stale-state
   handling, and deadline escalation are deterministic, retry-safe, resumable,
   and audit-producing.
-- **Keeps authority human.** Pal can prepare and propose. Humans retain the
+- **Keeps authority human.** RecruiterPal can prepare and propose. Humans retain the
   authority to advance consequential decisions, reject candidates, and hire.
 - **Works from keyboard or mouse.** Command navigation, contextual drawers,
   inline actions, semantic state badges, accessible controls, and reduced-motion
   support are part of the product surface.
 
-## The Pal operating model
+## The RecruiterPal operating model
 
 ```text
 PostgreSQL canonical truth
@@ -92,26 +92,26 @@ employment authority.
 
 ## Technology stack
 
-| Area               | Technology                                                   | Role in RecruiterPal                                                             |
-| ------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| Web application    | Next.js `16.3.2` App Router                                  | Server-rendered product surfaces, route handlers, and workflow endpoints         |
-| UI runtime         | React `19.2.8`                                               | Interactive recruiting workspace and contextual agent surfaces                   |
-| Language           | TypeScript `5.9.3` strict mode                               | Typed contracts across UI, domain, workflows, integrations, and agent boundaries |
-| Product system     | Turborepo `2.10.11` + pnpm `10.17.1`                         | Fast, explicit monorepo orchestration                                            |
-| Agent framework    | Eve `0.44.3`                                                 | `defineAgent()`, Pal sessions, skills, tools, subagents, proposals, and HITL     |
-| Agent adapter      | `@ai-sdk/openai` `4.0.46`                                    | Server-only Responses-compatible provider boundary                               |
-| Model provider     | OpenCode Go                                                  | `https://opencode.ai/zen/go/v1`, Responses protocol, `gpt-5.6-luna`              |
-| Durable execution  | Vercel Workflow SDK `4.8.4`                                  | Durable, resumable, retry-safe recruiting workflows                              |
-| Database           | PostgreSQL 18 / Neon-compatible                              | Canonical application state, event history, audit ledger, and tenant boundaries  |
-| ORM and migrations | Drizzle ORM `0.45.2` + Drizzle Kit `0.31.10`                 | Schema, migrations, repositories, and RLS-aware data access                      |
-| Authentication     | Better Auth `1.7.1`                                          | Email/password auth, organization plugin, sessions, roles, and permissions       |
-| Styling            | Tailwind CSS `4.3.3`                                         | Warm-neutral design tokens, state semantics, dark mode, and responsive layout    |
-| Components         | shadcn/ui-class primitives + Radix-style accessible patterns | Quiet, composable interface primitives and keyboard behavior                     |
-| Motion             | Motion `13.1.1`                                              | Restrained spatial and lifecycle transitions with reduced-motion support         |
-| Icons              | lucide-react                                                 | Consistent, accessible product iconography                                       |
-| Integrations       | Gmail and Google Calendar adapter boundaries                 | Explicit live-provider contracts with safe synthetic fallbacks                   |
-| Quality            | Vitest, Playwright `1.62.1`, Lefthook `1.13.6`               | Unit, contract, DB/RLS, workflow, agent-eval, browser, and pre-push gates        |
-| Delivery           | GitHub Actions                                               | Full quality and golden-flow qualification on every `main` push                  |
+| Area               | Technology                                                   | Role in RecruiterPal                                                                  |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Web application    | Next.js `16.3.2` App Router                                  | Server-rendered product surfaces, route handlers, and workflow endpoints              |
+| UI runtime         | React `19.2.8`                                               | Interactive recruiting workspace and contextual agent surfaces                        |
+| Language           | TypeScript `5.9.3` strict mode                               | Typed contracts across UI, domain, workflows, integrations, and agent boundaries      |
+| Product system     | Turborepo `2.10.11` + pnpm `10.17.1`                         | Fast, explicit monorepo orchestration                                                 |
+| Agent framework    | Eve `0.44.3`                                                 | `defineAgent()`, RecruiterPal sessions, skills, tools, subagents, proposals, and HITL |
+| Agent adapter      | `@ai-sdk/openai` `4.0.46`                                    | Server-only Responses-compatible provider boundary                                    |
+| Model provider     | OpenCode Go                                                  | `https://opencode.ai/zen/go/v1`, Responses protocol, `gpt-5.6-luna`                   |
+| Durable execution  | Vercel Workflow SDK `4.8.4`                                  | Durable, resumable, retry-safe recruiting workflows                                   |
+| Database           | PostgreSQL 18 / Neon-compatible                              | Canonical application state, event history, audit ledger, and tenant boundaries       |
+| ORM and migrations | Drizzle ORM `0.45.2` + Drizzle Kit `0.31.10`                 | Schema, migrations, repositories, and RLS-aware data access                           |
+| Authentication     | Better Auth `1.7.1`                                          | Email/password auth, organization plugin, sessions, roles, and permissions            |
+| Styling            | Tailwind CSS `4.3.3`                                         | Warm-neutral design tokens, state semantics, dark mode, and responsive layout         |
+| Components         | shadcn/ui-class primitives + Radix-style accessible patterns | Quiet, composable interface primitives and keyboard behavior                          |
+| Motion             | Motion `13.1.1`                                              | Restrained spatial and lifecycle transitions with reduced-motion support              |
+| Icons              | lucide-react                                                 | Consistent, accessible product iconography                                            |
+| Integrations       | Gmail and Google Calendar adapter boundaries                 | Explicit live-provider contracts with safe synthetic fallbacks                        |
+| Quality            | Vitest, Playwright `1.62.1`, Lefthook `1.13.6`               | Unit, contract, DB/RLS, workflow, agent-eval, browser, and pre-push gates             |
+| Delivery           | GitHub Actions                                               | Full quality and golden-flow qualification on every `main` push                       |
 
 Python is intentionally not part of the runtime. RecruiterPal keeps the
 application deterministic; statistical signals are computed in TypeScript
@@ -121,8 +121,8 @@ where the contract does not require probabilistic inference.
 
 RecruiterPal is deliberately opinionated about what an agent must never do:
 
-- Pal never auto-rejects or auto-hires a candidate.
-- Pal never owns a hidden candidate ranking, arbitrary fit score, personality
+- RecruiterPal never auto-rejects or auto-hires a candidate.
+- RecruiterPal never owns a hidden candidate ranking, arbitrary fit score, personality
   inference, facial or emotion analysis, accent analysis, or culture-fit proxy.
 - Protected demographics are segregated from selection evidence and scoring.
 - Every agent tool checks organization, actor, role, permission, resource,
@@ -146,7 +146,7 @@ visible, not to simulate a superficial happy path. It includes:
 - protocol and requirement drift without silently reinterpreting prior
   evidence;
 - actionable exceptions, decision-readiness states, and audit history;
-- Pal recognizing urgency and preparing safe actions while a human remains
+- RecruiterPal recognizing urgency and preparing safe actions while a human remains
   responsible for the consequential call.
 
 All committed demo data is synthetic and generated by deterministic seed
@@ -167,7 +167,7 @@ pnpm dev
 
 Open [http://localhost:3000/login](http://localhost:3000/login), then choose
 the seeded **Recruiting Lead** demo account. The app works in deterministic
-mode without a model key. To enable live Pal turns, add
+mode without a model key. To enable live RecruiterPal turns, add
 `OPENCODE_GO_API_KEY` to the server environment; the secret is never exposed
 to the browser.
 
@@ -179,13 +179,13 @@ packages/domain/           State machines, SLA math, readiness, authority, and i
 packages/db/               Drizzle schema, migrations, RLS, repositories, and seed generator
 packages/auth/             Better Auth, organization context, sessions, and RBAC
 packages/application/      Authorized deterministic mutation boundary
-packages/agent-runtime/    Eve adapter, Pal tools, sessions, proposals, events, and HITL
+packages/agent-runtime/    Eve adapter, RecruiterPal tools, sessions, proposals, events, and HITL
 packages/workflows/        Durable workflow plans, entrypoints, retry and idempotency logic
 packages/integrations/     Gmail / Google Calendar boundaries and synthetic adapters
-packages/contracts/        Typed UI intents, Pal responses, proposals, and cross-boundary schemas
+packages/contracts/        Typed UI intents, RecruiterPal responses, proposals, and cross-boundary schemas
 packages/ui/               Shared accessible design-system components
 packages/observability/    Audit ledger and operational telemetry helpers
-agent/                     Pal instructions, skills, tools, and specialist topology
+agent/                     RecruiterPal instructions, skills, tools, and specialist topology
 evals/                     Agent authority, privacy, evidence, and tenant-isolation evals
 e2e/                       Playwright golden product flows
 docs/build-contract/       Frozen implementation authority and acceptance matrix

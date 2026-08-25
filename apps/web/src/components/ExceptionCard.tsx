@@ -1,4 +1,7 @@
+"use client";
+
 import type { TodayExceptionRow } from "@/lib/queries";
+import { requestPalPrompt } from "@/components/pal-events";
 
 const SEVERITY_STYLE: Record<string, { chip: string; label: string; icon: string }> = {
   CRITICAL: {
@@ -60,7 +63,7 @@ export function ExceptionCard({ exception }: { exception: TodayExceptionRow }) {
               </span>
             ) : null}
             <span>
-              Pal status:{" "}
+              RecruiterPal status:{" "}
               <span className="font-medium text-text-secondary">
                 {exception.status === "WAITING_HUMAN"
                   ? "needs your decision"
@@ -74,15 +77,39 @@ export function ExceptionCard({ exception }: { exception: TodayExceptionRow }) {
         <div className="flex shrink-0 flex-col items-end gap-2">
           <button
             type="button"
+            data-pal-action="inspect-evidence"
+            onClick={() =>
+              requestPalPrompt({
+                prompt: `Inspect the evidence behind the exception “${exception.title}”. Explain the observed facts, missing or conflicting evidence, and the safest next step. Do not make a hiring decision.`,
+                context: {
+                  entityType: "exception",
+                  entityId: exception.id,
+                  applicationId: exception.applicationId,
+                  title: exception.title,
+                },
+              })
+            }
             className="h-8 rounded-control bg-pal-strong px-3 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-pal"
           >
             Inspect evidence
           </button>
           <button
             type="button"
+            data-pal-action="ask-why"
+            onClick={() =>
+              requestPalPrompt({
+                prompt: `Why is the exception “${exception.title}” blocking or risking this recruiting process? Ground the explanation in current canonical evidence and name the human or workflow that owns the next step.`,
+                context: {
+                  entityType: "exception",
+                  entityId: exception.id,
+                  applicationId: exception.applicationId,
+                  title: exception.title,
+                },
+              })
+            }
             className="h-8 rounded-control border border-border-strong px-3 text-[13px] text-text-primary transition-colors duration-150 hover:bg-surface-2"
           >
-            Ask Pal why
+            Ask RecruiterPal why
           </button>
         </div>
       </div>

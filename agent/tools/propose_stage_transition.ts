@@ -17,7 +17,7 @@ const inputSchema = baseToolInput.extend({
 
 export default defineTool({
   description:
-    "Propose a valid non-terminal application stage transition. Pal can never execute a hire or reject decision.",
+    "Propose a valid non-terminal application stage transition. RecruiterPal can never execute a hire or reject decision.",
   inputSchema,
   outputSchema: proposalOutput,
   async execute(input, ctx) {

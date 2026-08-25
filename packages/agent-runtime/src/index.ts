@@ -30,7 +30,7 @@ export const OPENCODE_GO_ENDPOINT =
   process.env.OPENCODE_GO_BASE_URL ?? "https://opencode.ai/zen/go/v1";
 export const OPENCODE_GO_PROTOCOL = "responses" as const;
 export const OPENCODE_GO_MODEL = "gpt-5.6-luna" as const;
-export const AGENT_PROMPT_VERSION = "pal-1.0.0";
+export const AGENT_PROMPT_VERSION = "recruiterpal-1.1.0";
 
 export interface ProviderQualificationState {
   configured: boolean;

@@ -19,7 +19,11 @@ export const metadata: Metadata = { title: "Today" };
 export default async function TodayPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ intent?: string | string[] }>;
+  searchParams?: Promise<{
+    intent?: string | string[];
+    pal?: string | string[];
+    candidate?: string | string[];
+  }>;
 }) {
   const session = await getSession(getAuth());
   if (!session) return null;
@@ -43,6 +47,12 @@ export default async function TodayPage({
 
   const provider = providerQualificationState();
   const intent = typeof params.intent === "string" ? params.intent : undefined;
+  const candidateId = typeof params.candidate === "string" ? params.candidate : undefined;
+  const requestedPrompt = typeof params.pal === "string" ? params.pal : undefined;
+  const initialPrompt =
+    requestedPrompt === "candidate-readiness"
+      ? "Explain the decision readiness for the selected candidate. Use the current evidence, scorecards, conflicts, and missing requirements; keep the final employment decision with a human."
+      : requestedPrompt;
 
   return (
     <div className="flex h-full flex-col">
@@ -119,7 +129,7 @@ export default async function TodayPage({
 
             <ExceptionSection
               title="Critical"
-              description="Consequential time pressure. Pal prepares evidence — the decision stays yours."
+              description="Consequential time pressure. RecruiterPal prepares evidence — the decision stays yours."
               exceptions={critical}
             />
             <ExceptionSection
@@ -187,9 +197,9 @@ export default async function TodayPage({
               </section>
             ) : null}
 
-            <section aria-label="Handled by Pal while you were away" className="mb-6">
+            <section aria-label="Handled by RecruiterPal while you were away" className="mb-6">
               <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-text-secondary">
-                Handled by Pal
+                Handled by RecruiterPal
               </h2>
               {execution.automatedActivity.length === 0 ? (
                 <p className="rounded-card border border-dashed border-border-subtle bg-surface-1 px-4 py-5 text-[13px] leading-relaxed text-text-tertiary">
@@ -199,7 +209,7 @@ export default async function TodayPage({
               ) : (
                 <ol
                   className="space-y-2 rounded-card border border-border-subtle bg-surface-1 p-3"
-                  aria-label="Recent Pal and workflow activity"
+                  aria-label="Recent RecruiterPal and workflow activity"
                 >
                   {execution.automatedActivity.map((activity) => (
                     <li
@@ -246,6 +256,10 @@ export default async function TodayPage({
               occurredAt: activity.occurredAt.toISOString(),
             }))}
             intent={intent}
+            initialPrompt={initialPrompt}
+            initialPromptContext={
+              candidateId ? { entityType: "candidate", entityId: candidateId } : undefined
+            }
           />
         </div>
       </div>
