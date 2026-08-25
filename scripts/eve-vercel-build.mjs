@@ -1,5 +1,14 @@
 import { spawnSync } from "node:child_process";
-import { copyFileSync, lstatSync, mkdirSync, readdirSync, realpathSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -20,6 +29,25 @@ function copyTreeWithoutLinks(source, target) {
 
   mkdirSync(dirname(target), { recursive: true });
   copyFileSync(source, target);
+}
+
+function compactEveProtocolFunctions(outputDirectory) {
+  const configPath = resolve(outputDirectory, "config.json");
+  const config = JSON.parse(readFileSync(configPath, "utf8"));
+  config.routes = config.routes.map((route) => {
+    if (
+      typeof route?.src === "string" &&
+      (route.src.includes("/eve/v1") || route.dest?.includes("/eve/v1"))
+    ) {
+      return { ...route, dest: "/__server" };
+    }
+    return route;
+  });
+  writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+  rmSync(resolve(outputDirectory, "functions", "eve"), {
+    force: true,
+    recursive: true,
+  });
 }
 
 const scriptRoot = dirname(fileURLToPath(import.meta.url));
@@ -55,3 +83,4 @@ const resolvedTargetOutputDirectory = resolve(process.cwd(), targetOutputDirecto
 mkdirSync(dirname(resolvedTargetOutputDirectory), { recursive: true });
 rmSync(resolvedTargetOutputDirectory, { force: true, recursive: true });
 copyTreeWithoutLinks(stagedOutputDirectory, resolvedTargetOutputDirectory);
+compactEveProtocolFunctions(resolvedTargetOutputDirectory);
