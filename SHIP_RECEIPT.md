@@ -7,8 +7,7 @@
 RecruiterPal is qualified through M9 for the local product and public-source
 release. Neon, Vercel, OpenCode Go, Eve, hosted smoke, and the patched Next.js
 release gate are qualified. Live Gmail and Google Calendar credentials remain
-blocked; the full local Docker-backed QA path could not complete because the
-Docker daemon was unavailable in this environment.
+blocked; the remaining limitations are listed below.
 
 ## Repository
 
@@ -97,8 +96,8 @@ Docker daemon was unavailable in this environment.
 - Workflow tests: PASS (4 pure workflow tests plus DB retry/idempotency coverage)
 - security/dependency scan: PASS (`pnpm audit --audit-level high`; no known vulnerabilities)
 - secret scan: PASS
-- pre-push: BLOCKED on the final stack (Lefthook is configured, but mandatory `qa:fast` cannot start `postgres:18-alpine` while the local Docker daemon is unavailable)
-- CI: PENDING (final commits not pushed yet; receipt will be updated with the resulting run)
+- pre-push: PASS (Lefthook `1.13.6`; mandatory `qa:fast` completed with Docker-backed PostgreSQL 18)
+- CI: PASS (GitHub Actions run `32887936078`; quality and e2e jobs passed)
 
 ## Deployment
 
@@ -111,8 +110,8 @@ Docker daemon was unavailable in this environment.
 ## Known limitations
 
 - Live Gmail and Google Calendar writes remain unqualified until provider credentials are supplied; synthetic fallbacks are explicit and non-delivering.
-- The full local Docker-backed QA/pre-push path remains unavailable until the Docker Desktop Linux daemon is running; hosted Neon qualification and all non-DB final gates pass.
 - Lint is green with a small set of non-blocking existing warnings; no lint errors remain.
+- GitHub Actions reports non-blocking Node.js 20 deprecation annotations from `pnpm/action-setup@v4`; jobs still pass on the hosted runner.
 
 ## Integrity statement
 
@@ -143,8 +142,8 @@ WORKFLOW_TESTS=PASS
 EVE_EVALS=PASS_9_OF_9
 OPENCODE_GO=PASS_RAW_RESPONSES_AND_EVE_TURN
 PLAYWRIGHT=PASS_HOSTED_DEMO_AND_CI_GOLDEN_FLOW
-PRE_PUSH=BLOCKED_LOCAL_DOCKER_DAEMON_UNAVAILABLE
-CI=PENDING_FINAL_PUSH
+PRE_PUSH=PASS_LEFTHOOK_QA_FAST
+CI=PASS_RUN_32887936078
 VERCEL=PASS_PRODUCTION_DPL_3EEDMLYLEGUEM1EHHVK69UUEPRLM
 NEON=PASS_LUCKY_BUTTERFLY_64762550
 SECURITY_RELEASE_GATE=PASS_NEXT_16_3_3
